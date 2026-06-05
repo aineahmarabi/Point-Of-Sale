@@ -44,6 +44,78 @@ const managerPermissions = [
   "purchase_orders:view",
 ];
 
+/**
+ * Idempotent role backfill. Creates any of the standard roles that are
+ * missing (matched by name), without the one-time guard — safe to run again
+ * at any time. Use this when the roles table is incomplete.
+ *
+ *   npx convex run seed:ensureRoles
+ */
+export const ensureRoles = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const desired: {
+      name: string;
+      app: "admin" | "web";
+      description: string;
+      permissions: string[];
+    }[] = [
+      {
+        name: "Super Admin",
+        app: "admin",
+        description: "Full access to all modules and actions",
+        permissions: ["*"],
+      },
+      {
+        name: "Admin",
+        app: "admin",
+        description: "Administrative access to all modules and actions",
+        permissions: ["*"],
+      },
+      {
+        name: "Manager",
+        app: "admin",
+        description:
+          "Cashier abilities plus voids, inventory, discounts and reporting",
+        permissions: managerPermissions,
+      },
+      {
+        name: "Cashier",
+        app: "admin",
+        description: "Operates the POS: sells, returns, opens/closes shifts",
+        permissions: cashierPermissions,
+      },
+      {
+        name: "Customer",
+        app: "web",
+        description: "Default role assigned to new users",
+        permissions: [],
+      },
+    ];
+
+    const created: string[] = [];
+    const skipped: string[] = [];
+    for (const role of desired) {
+      const existing = await ctx.db
+        .query("roles")
+        .withIndex("by_name", (q) => q.eq("name", role.name))
+        .first();
+      if (existing) {
+        skipped.push(role.name);
+        continue;
+      }
+      await ctx.db.insert("roles", role);
+      created.push(role.name);
+    }
+
+    return {
+      created,
+      skipped,
+      message: `Roles ensured. Created: [${created.join(", ") || "none"}]. Already existed: [${skipped.join(", ") || "none"}].`,
+    };
+  },
+});
+
 export const seed = mutation({
   args: { email: v.string() },
   handler: async (ctx, args) => {
