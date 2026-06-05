@@ -162,15 +162,16 @@ function PosGate({ children }: { children: ReactNode }) {
     <CartProvider>
       <div className="flex h-screen flex-col bg-slate-900">
         {isAdminRole(currentUser?.role) && (
-          <div className="flex items-center justify-center gap-2 bg-slate-950 px-4 py-1.5 text-xs text-slate-300">
-            <span>Admin View —</span>
-            <Link
-              href="/dashboard"
-              className="font-medium text-burgundy-400 hover:underline"
-            >
-              Back to Dashboard
-            </Link>
-          </div>
+          <Link
+            href="/dashboard"
+            className="flex items-center justify-center gap-2 bg-burgundy-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-burgundy-700"
+          >
+            <span className="uppercase tracking-wide">Admin View</span>
+            <span className="opacity-70">—</span>
+            <span className="underline underline-offset-2">
+              Back to Dashboard →
+            </span>
+          </Link>
         )}
         <TerminalHeader session={session} />
         <div className="min-h-0 flex-1 overflow-hidden">{children}</div>

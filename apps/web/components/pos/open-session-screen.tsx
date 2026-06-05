@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
@@ -11,6 +12,7 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 
 import { cashierName } from "@/lib/format";
+import { isAdminRole } from "@/lib/auth";
 
 function greeting(d: Date | null): string {
   if (!d) return "Welcome";
@@ -118,6 +120,18 @@ export function OpenSessionScreen() {
             {submitting ? "Opening…" : "Start Shift"}
           </Button>
         </form>
+
+        {isAdminRole(currentUser?.role) && (
+          <div className="mt-6 border-t border-slate-700 pt-4 text-center text-xs text-slate-500">
+            <span>Are you an admin? </span>
+            <Link
+              href="/dashboard"
+              className="font-medium text-burgundy-400 hover:underline"
+            >
+              Go to Dashboard →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
