@@ -14,7 +14,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 
-import { cashierName } from "@/lib/format";
+import { cashierFirstName } from "@/lib/format";
 import { isAdminRole } from "@/lib/auth";
 
 function greeting(d: Date | null): string {
@@ -45,7 +45,7 @@ export function OpenSessionScreen() {
 
   const currency = settings?.currency ?? "KES";
   const storeName = settings?.store_name ?? "POS Terminal";
-  const firstName = currentUser?.name?.first ?? cashierName(currentUser);
+  const firstName = cashierFirstName(currentUser);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
