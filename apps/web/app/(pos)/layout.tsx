@@ -19,7 +19,7 @@ function FullScreenLoader({ label = "Loading…" }: { label?: string }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-900 text-slate-400">
       <div className="flex flex-col items-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-700 border-t-emerald-400" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-700 border-t-burgundy-400" />
         <p className="text-sm">{label}</p>
       </div>
     </div>
@@ -53,7 +53,7 @@ function FullScreenError({
             Reload
           </Button>
           <Button
-            className="h-11 flex-1 bg-emerald-500 text-white hover:bg-emerald-600"
+            className="h-11 flex-1 bg-burgundy-500 text-white hover:bg-burgundy-600"
             onClick={() => void signOut({ redirectUrl: "/sign-in" })}
           >
             Sign out
@@ -166,7 +166,7 @@ function PosGate({ children }: { children: ReactNode }) {
             <span>Admin View —</span>
             <Link
               href="/dashboard"
-              className="font-medium text-emerald-400 hover:underline"
+              className="font-medium text-burgundy-400 hover:underline"
             >
               Back to Dashboard
             </Link>

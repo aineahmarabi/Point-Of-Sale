@@ -28,7 +28,7 @@ export function TerminalHeader({ session }: { session: Doc<"sessions"> }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between bg-slate-900 px-6 text-slate-100">
       {/* Left — store name */}
-      <div className="text-lg font-bold tracking-tight text-emerald-400">
+      <div className="text-lg font-bold tracking-tight text-burgundy-400">
         {storeName}
       </div>
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";

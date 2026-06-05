@@ -229,7 +229,7 @@ export function PaymentModal({
     <Modal open={open} onClose={onClose} dismissable={phase !== "processing"}>
       {phase === "success" ? (
         <div className="space-y-6 p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-700">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-burgundy-100 text-3xl text-burgundy-700">
             ✓
           </div>
           <div>
@@ -247,7 +247,7 @@ export function PaymentModal({
               Print Receipt
             </Button>
             <Button
-              className="h-12 flex-1 bg-emerald-600 hover:bg-emerald-700"
+              className="h-12 flex-1 bg-burgundy-600 hover:bg-burgundy-700"
               onClick={handleNewSale}
             >
               New Sale
@@ -304,11 +304,11 @@ export function PaymentModal({
                 />
               </div>
               {change > 0 && (
-                <div className="flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3">
-                  <span className="text-sm font-medium text-emerald-800">
+                <div className="flex items-center justify-between rounded-lg bg-burgundy-50 px-4 py-3">
+                  <span className="text-sm font-medium text-burgundy-800">
                     Change Due
                   </span>
-                  <span className="text-2xl font-bold tabular-nums text-emerald-600">
+                  <span className="text-2xl font-bold tabular-nums text-burgundy-600">
                     {money(change, currency)}
                   </span>
                 </div>
@@ -392,7 +392,7 @@ export function PaymentModal({
 
           <div className="space-y-2">
             <Button
-              className="h-14 w-full bg-emerald-600 text-lg font-bold hover:bg-emerald-700"
+              className="h-14 w-full bg-burgundy-600 text-lg font-bold hover:bg-burgundy-700"
               onClick={handleConfirm}
               disabled={!canConfirm}
             >
@@ -433,7 +433,7 @@ function MethodCard({
       className={cn(
         "flex min-h-[64px] flex-col items-center justify-center rounded-lg border-2 p-2 text-center transition",
         active
-          ? "border-emerald-600 bg-emerald-50"
+          ? "border-burgundy-600 bg-burgundy-50"
           : "border-zinc-200 hover:border-zinc-300",
       )}
     >

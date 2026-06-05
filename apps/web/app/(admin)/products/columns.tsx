@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
@@ -17,6 +17,7 @@ interface ActionCallbacks {
   onView: (row: Product) => void;
   onEdit: (row: Product) => void;
   onDelete: (row: Product) => void;
+  onManageVariants: (row: Product) => void;
 }
 
 export function getColumns(actions: ActionCallbacks): ColumnDef<Product>[] {
@@ -28,14 +29,14 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Product>[] {
     {
       accessorKey: "sku",
       header: "SKU",
-      cell: ({ row }) => row.getValue<string | undefined>("sku") ?? "â€”",
+      cell: ({ row }) => row.getValue<string | undefined>("sku") ?? "—",
     },
     {
       accessorKey: "selling_price",
       header: "Price",
       cell: ({ row }) => {
         const price = row.getValue<number>("selling_price");
-        return price?.toFixed(2) ?? "â€”";
+        return price?.toFixed(2) ?? "—";
       },
     },
     {
@@ -56,19 +57,28 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Product>[] {
       accessorKey: "category_name",
       header: "Category",
       cell: ({ row }) =>
-        row.getValue<string | null>("category_name") ?? "â€”",
+        row.getValue<string | null>("category_name") ?? "—",
     },
     {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => (
-        <ActionsCell
-          row={row.original}
-          module="products"
-          onView={actions.onView}
-          onEdit={actions.onEdit}
-          onDelete={actions.onDelete}
-        />
+        <div className="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={() => actions.onManageVariants(row.original)}
+            className="text-burgundy-600 rounded-md px-2 py-1 text-xs font-medium hover:underline"
+          >
+            Variants
+          </button>
+          <ActionsCell
+            row={row.original}
+            module="products"
+            onView={actions.onView}
+            onEdit={actions.onEdit}
+            onDelete={actions.onDelete}
+          />
+        </div>
       ),
     },
   ];

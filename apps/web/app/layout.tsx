@@ -14,9 +14,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="h-full">
       <body
-        className={`${kumbhSans.variable} ${poltawskiSerif.variable} ${geistMono.variable}`}
+        className={`${kumbhSans.variable} ${poltawskiSerif.variable} ${geistMono.variable} h-full overflow-x-hidden`}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>

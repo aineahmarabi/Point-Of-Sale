@@ -12,6 +12,8 @@ import {
 import type { Doc, Id } from "@repo/backend/dataModel";
 
 export interface CartItem {
+  /** Stable identity = product + variant, so each variant is its own line. */
+  key: string;
   product_id: Id<"products">;
   variant_id?: Id<"variants">;
   product_name: string;
@@ -47,8 +49,8 @@ interface CartContextValue {
   customer: Doc<"customers"> | null;
   discount: AppliedDiscount | null;
   addItem: (input: AddItemInput) => void;
-  removeItem: (productId: Id<"products">) => void;
-  updateQuantity: (productId: Id<"products">, quantity: number) => void;
+  removeItem: (key: string) => void;
+  updateQuantity: (key: string, quantity: number) => void;
   applyDiscount: (discount: AppliedDiscount | null) => void;
   setCustomer: (customer: Doc<"customers"> | null) => void;
   clearCart: () => void;
@@ -60,6 +62,10 @@ interface CartContextValue {
 }
 
 const STORAGE_KEY = "pos-cart-v1";
+
+function itemKey(productId: string, variantId?: string): string {
+  return `${productId}::${variantId ?? ""}`;
+}
 
 /** Recompute line_total and tax_amount from unit_price/quantity. */
 function recompute(item: CartItem): CartItem {
@@ -83,7 +89,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        setItems(Array.isArray(parsed.items) ? parsed.items : []);
+        const loaded: CartItem[] = Array.isArray(parsed.items)
+          ? parsed.items.map((i: CartItem) => ({
+              ...i,
+              key: i.key ?? itemKey(i.product_id, i.variant_id),
+            }))
+          : [];
+        setItems(loaded);
         setCustomerState(parsed.customer ?? null);
         setDiscount(parsed.discount ?? null);
       }
@@ -107,24 +119,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, customer, discount, hydrated]);
 
   const addItem = useCallback((input: AddItemInput) => {
+    const key = itemKey(input.product_id, input.variant_id);
     setItems((prev) => {
-      const idx = prev.findIndex(
-        (i) =>
-          i.product_id === input.product_id &&
-          i.variant_id === input.variant_id,
-      );
-      const existing = prev[idx];
-      if (existing) {
-        const next = [...prev];
-        next[idx] = recompute({
-          ...existing,
-          quantity: existing.quantity + 1,
-        });
-        return next;
+      const idx = prev.findIndex((i) => i.key === key);
+      if (idx >= 0) {
+        const existing = prev[idx];
+        if (existing) {
+          const next = [...prev];
+          next[idx] = recompute({
+            ...existing,
+            quantity: existing.quantity + 1,
+          });
+          return next;
+        }
       }
       return [
         ...prev,
         recompute({
+          key,
           product_id: input.product_id,
           variant_id: input.variant_id,
           product_name: input.product_name,
@@ -140,22 +152,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const removeItem = useCallback((productId: Id<"products">) => {
-    setItems((prev) => prev.filter((i) => i.product_id !== productId));
+  const removeItem = useCallback((key: string) => {
+    setItems((prev) => prev.filter((i) => i.key !== key));
   }, []);
 
-  const updateQuantity = useCallback(
-    (productId: Id<"products">, quantity: number) => {
-      setItems((prev) => {
-        if (quantity <= 0)
-          return prev.filter((i) => i.product_id !== productId);
-        return prev.map((i) =>
-          i.product_id === productId ? recompute({ ...i, quantity }) : i,
-        );
-      });
-    },
-    [],
-  );
+  const updateQuantity = useCallback((key: string, quantity: number) => {
+    setItems((prev) => {
+      if (quantity <= 0) return prev.filter((i) => i.key !== key);
+      return prev.map((i) =>
+        i.key === key ? recompute({ ...i, quantity }) : i,
+      );
+    });
+  }, []);
 
   const applyDiscount = useCallback(
     (d: AppliedDiscount | null) => setDiscount(d),

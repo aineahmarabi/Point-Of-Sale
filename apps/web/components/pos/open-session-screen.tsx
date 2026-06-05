@@ -75,7 +75,7 @@ export function OpenSessionScreen() {
     <div className="flex min-h-screen items-center justify-center bg-slate-900 p-4">
       <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-800 p-8 text-slate-100 shadow-2xl">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
+          <p className="text-sm font-semibold uppercase tracking-widest text-burgundy-400">
             {storeName}
           </p>
           <h1 className="mt-3 text-2xl font-bold">
@@ -105,14 +105,14 @@ export function OpenSessionScreen() {
                 placeholder="0.00"
                 value={openingCash}
                 onChange={(e) => setOpeningCash(e.target.value)}
-                className="h-14 border-slate-600 bg-slate-900 pl-16 text-center text-2xl font-bold text-white placeholder:text-slate-600 focus-visible:ring-emerald-500"
+                className="h-14 border-slate-600 bg-slate-900 pl-16 text-center text-2xl font-bold text-white placeholder:text-slate-600 focus-visible:ring-burgundy-500"
               />
             </div>
           </div>
           {error && <p className="text-sm text-red-400">{error}</p>}
           <Button
             type="submit"
-            className="h-14 w-full bg-emerald-500 text-base font-bold text-white hover:bg-emerald-600"
+            className="h-14 w-full bg-burgundy-500 text-base font-bold text-white hover:bg-burgundy-600"
             disabled={submitting || !currentUser}
           >
             {submitting ? "Opening…" : "Start Shift"}

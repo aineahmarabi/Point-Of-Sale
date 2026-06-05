@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
@@ -33,7 +33,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Discount>[] {
         return code ? (
           <span className="font-mono text-xs">{code}</span>
         ) : (
-          "â€”"
+          "—"
         );
       },
     },

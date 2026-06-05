@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
@@ -26,8 +26,8 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Inventory>[] {
       header: "Product",
       cell: ({ row }) => {
         const item = row.original;
-        const name = item.product_name ?? "â€”";
-        return item.variant_name ? `${name} Â· ${item.variant_name}` : name;
+        const name = item.product_name ?? "—";
+        return item.variant_name ? `${name} · ${item.variant_name}` : name;
       },
     },
     {

@@ -87,7 +87,7 @@ export default function DashboardPage() {
         <StatCard
           label="Total Sales Today"
           value={money(totalSalesToday, currency)}
-          accent="text-emerald-600"
+          accent="text-burgundy-600"
         />
         <StatCard
           label="Total Orders Today"

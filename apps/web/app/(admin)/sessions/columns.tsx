@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
@@ -22,7 +22,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Session>[] {
     {
       accessorKey: "cashier_name",
       header: "Cashier",
-      cell: ({ row }) => row.getValue<string | null>("cashier_name") ?? "â€”",
+      cell: ({ row }) => row.getValue<string | null>("cashier_name") ?? "—",
     },
     {
       accessorKey: "status",
@@ -43,7 +43,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Session>[] {
       header: "Opened",
       cell: ({ row }) => {
         const ts = row.getValue<number>("opened_at");
-        return ts ? new Date(ts).toLocaleString() : "â€”";
+        return ts ? new Date(ts).toLocaleString() : "—";
       },
     },
     {
@@ -51,20 +51,20 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Session>[] {
       header: "Closed",
       cell: ({ row }) => {
         const ts = row.getValue<number | undefined>("closed_at");
-        return ts ? new Date(ts).toLocaleString() : "â€”";
+        return ts ? new Date(ts).toLocaleString() : "—";
       },
     },
     {
       accessorKey: "total_sales",
       header: "Total Sales",
-      cell: ({ row }) => row.getValue<number>("total_sales")?.toFixed(2) ?? "â€”",
+      cell: ({ row }) => row.getValue<number>("total_sales")?.toFixed(2) ?? "—",
     },
     {
       accessorKey: "cash_variance",
       header: "Variance",
       cell: ({ row }) => {
         const variance = row.getValue<number | undefined>("cash_variance");
-        if (variance == null) return "â€”";
+        if (variance == null) return "—";
         return (
           <span
             className={

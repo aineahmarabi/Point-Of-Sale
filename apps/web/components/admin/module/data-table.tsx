@@ -96,7 +96,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex-1 overflow-auto px-8">
+      <div className="flex-1 overflow-auto px-4 sm:px-8">
         <Table>
           <TableHeader className="bg-accent sticky top-0 z-10 border-b">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -168,7 +168,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex shrink-0 items-center justify-between px-8 py-4">
+      <div className="flex shrink-0 items-center justify-between px-4 sm:px-8 py-4">
         <p className="text-muted-foreground text-sm">
           Total Count:{" "}
           {totalCount != null ? (

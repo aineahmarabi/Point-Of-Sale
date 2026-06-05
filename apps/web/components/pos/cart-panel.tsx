@@ -69,7 +69,7 @@ export function CartPanel({
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
             Cart
-            <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-emerald-500 px-2 text-xs font-bold text-white">
+            <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-burgundy-500 px-2 text-xs font-bold text-white">
               {item_count}
             </span>
           </h2>
@@ -96,7 +96,7 @@ export function CartPanel({
         ) : (
           <ul className="divide-y divide-slate-700">
             {items.map((item) => (
-              <li key={item.product_id} className="px-5 py-3">
+              <li key={item.key} className="px-5 py-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-slate-100">
@@ -109,7 +109,7 @@ export function CartPanel({
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeItem(item.product_id)}
+                    onClick={() => removeItem(item.key)}
                     className="shrink-0 px-1 text-lg leading-none text-slate-500 hover:text-red-400"
                     aria-label="Remove item"
                   >
@@ -121,7 +121,7 @@ export function CartPanel({
                     <button
                       type="button"
                       onClick={() =>
-                        updateQuantity(item.product_id, item.quantity - 1)
+                        updateQuantity(item.key, item.quantity - 1)
                       }
                       className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-600 text-xl text-slate-200 hover:bg-slate-700"
                       aria-label="Decrease quantity"
@@ -134,7 +134,7 @@ export function CartPanel({
                     <button
                       type="button"
                       onClick={() =>
-                        updateQuantity(item.product_id, item.quantity + 1)
+                        updateQuantity(item.key, item.quantity + 1)
                       }
                       className="flex h-10 w-10 items-center justify-center rounded-md border border-slate-600 text-xl text-slate-200 hover:bg-slate-700"
                       aria-label="Increase quantity"
@@ -195,7 +195,7 @@ export function CartPanel({
             <span className="tabular-nums">{money(subtotal, currency)}</span>
           </div>
           {discount && discount_total > 0 ? (
-            <div className="flex justify-between text-emerald-400">
+            <div className="flex justify-between text-burgundy-400">
               <span className="flex items-center gap-2">
                 Discount
                 <button
@@ -217,7 +217,7 @@ export function CartPanel({
           </div>
           <div className="flex items-baseline justify-between border-t border-slate-700 pt-2">
             <span className="text-base font-semibold">Total</span>
-            <span className="text-2xl font-bold tabular-nums text-emerald-400">
+            <span className="text-2xl font-bold tabular-nums text-burgundy-400">
               {money(grand_total, currency)}
             </span>
           </div>
@@ -230,7 +230,7 @@ export function CartPanel({
         ) : null}
 
         <Button
-          className="h-14 w-full bg-emerald-500 text-lg font-bold text-white hover:bg-emerald-600 disabled:bg-slate-600 disabled:text-slate-400"
+          className="h-14 w-full bg-burgundy-500 text-lg font-bold text-white hover:bg-burgundy-600 disabled:bg-slate-600 disabled:text-slate-400"
           disabled={!canCharge}
           onClick={() => setPaymentOpen(true)}
         >

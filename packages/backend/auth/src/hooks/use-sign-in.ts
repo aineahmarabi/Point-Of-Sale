@@ -5,6 +5,23 @@ import { useSignIn } from "@clerk/nextjs";
 
 type Step = "signIn" | "verify";
 
+/**
+ * Convert any thrown auth error into a safe, user-friendly message. Network
+ * failures (offline / blocked) surface as a TypeError "Failed to fetch"; Clerk's
+ * own errors already carry user-safe messages. Nothing internal is exposed.
+ */
+function toFriendlyAuthError(err: unknown): string {
+  if (
+    err instanceof TypeError ||
+    (err instanceof Error &&
+      /failed to fetch|network|load failed/i.test(err.message))
+  ) {
+    return "Unable to reach the server. Check your internet connection and try again.";
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return "Something went wrong. Please try again.";
+}
+
 export function useSignInFlow() {
   const { signIn, isLoaded, setActive } = useSignIn();
 
@@ -38,9 +55,7 @@ export function useSignInFlow() {
           setError("Sign-in could not be completed. Please try again.");
         }
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "An unexpected error occurred.";
-        setError(message);
+        setError(toFriendlyAuthError(err));
       } finally {
         setLoading(false);
       }
@@ -68,9 +83,7 @@ export function useSignInFlow() {
           setError("Verification could not be completed. Please try again.");
         }
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "An unexpected error occurred.";
-        setError(message);
+        setError(toFriendlyAuthError(err));
       } finally {
         setLoading(false);
       }

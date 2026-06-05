@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useQuery } from "convex/react";
 import { api } from "@repo/backend";
@@ -12,11 +12,11 @@ type Order = Doc<"orders"> & {
 };
 
 function money(value?: number): string {
-  return value != null ? value.toFixed(2) : "â€”";
+  return value != null ? value.toFixed(2) : "—";
 }
 
 function dateTime(ts?: number): string {
-  return ts ? new Date(ts).toLocaleString() : "â€”";
+  return ts ? new Date(ts).toLocaleString() : "—";
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -54,7 +54,7 @@ export function OrderView({ open, onOpenChange, order }: OrderViewProps) {
         <div className="flex flex-col gap-6">
           <dl className="flex flex-col">
             <Row label="Order #" value={order.order_number} />
-            <Row label="Cashier" value={order.cashier_name ?? "â€”"} />
+            <Row label="Cashier" value={order.cashier_name ?? "—"} />
             <Row label="Customer" value={order.customer_name ?? "Walk-in"} />
             <Row
               label="Status"
@@ -68,20 +68,20 @@ export function OrderView({ open, onOpenChange, order }: OrderViewProps) {
                 </span>
               }
             />
-            <Row label="Reference" value={order.payment_reference ?? "â€”"} />
+            <Row label="Reference" value={order.payment_reference ?? "—"} />
             <Row label="Subtotal" value={money(order.subtotal)} />
             <Row label="Discount" value={money(order.discount_total)} />
             <Row label="Tax" value={money(order.tax_total)} />
             <Row label="Grand Total" value={money(order.grand_total)} />
             <Row label="Completed" value={dateTime(order.completed_at)} />
-            <Row label="Notes" value={order.notes ?? "â€”"} />
+            <Row label="Notes" value={order.notes ?? "—"} />
           </dl>
 
           <div>
             <p className="mb-2 text-sm font-medium">Items</p>
             <div className="divide-y rounded-md border">
               {items === undefined ? (
-                <p className="text-muted-foreground p-3 text-sm">Loadingâ€¦</p>
+                <p className="text-muted-foreground p-3 text-sm">Loading…</p>
               ) : items.length === 0 ? (
                 <p className="text-muted-foreground p-3 text-sm">No items.</p>
               ) : (
@@ -94,7 +94,7 @@ export function OrderView({ open, onOpenChange, order }: OrderViewProps) {
                       {item.product_name}
                       <span className="text-muted-foreground">
                         {" "}
-                        Ã— {item.quantity}
+                        × {item.quantity}
                       </span>
                     </span>
                     <span className="font-medium">

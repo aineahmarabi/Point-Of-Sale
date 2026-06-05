@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
@@ -34,7 +34,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Order>[] {
     {
       accessorKey: "cashier_name",
       header: "Cashier",
-      cell: ({ row }) => row.getValue<string | null>("cashier_name") ?? "â€”",
+      cell: ({ row }) => row.getValue<string | null>("cashier_name") ?? "—",
     },
     {
       accessorKey: "customer_name",
@@ -44,7 +44,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Order>[] {
     {
       accessorKey: "grand_total",
       header: "Total",
-      cell: ({ row }) => row.getValue<number>("grand_total")?.toFixed(2) ?? "â€”",
+      cell: ({ row }) => row.getValue<number>("grand_total")?.toFixed(2) ?? "—",
     },
     {
       accessorKey: "payment_method",
@@ -74,7 +74,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Order>[] {
       header: "Completed",
       cell: ({ row }) => {
         const ts = row.getValue<number | undefined>("completed_at");
-        return ts ? new Date(ts).toLocaleString() : "â€”";
+        return ts ? new Date(ts).toLocaleString() : "—";
       },
     },
     {

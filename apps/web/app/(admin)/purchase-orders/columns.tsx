@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
@@ -36,7 +36,7 @@ export function getColumns(
     {
       accessorKey: "supplier_name",
       header: "Supplier",
-      cell: ({ row }) => row.getValue<string | null>("supplier_name") ?? "â€”",
+      cell: ({ row }) => row.getValue<string | null>("supplier_name") ?? "—",
     },
     {
       accessorKey: "status",
@@ -57,13 +57,13 @@ export function getColumns(
       header: "Order Date",
       cell: ({ row }) => {
         const ts = row.getValue<number>("order_date");
-        return ts ? new Date(ts).toLocaleDateString() : "â€”";
+        return ts ? new Date(ts).toLocaleDateString() : "—";
       },
     },
     {
       accessorKey: "total_amount",
       header: "Total",
-      cell: ({ row }) => row.getValue<number>("total_amount")?.toFixed(2) ?? "â€”",
+      cell: ({ row }) => row.getValue<number>("total_amount")?.toFixed(2) ?? "—",
     },
     {
       id: "actions",

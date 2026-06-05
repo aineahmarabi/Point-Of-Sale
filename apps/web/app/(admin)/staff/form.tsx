@@ -28,12 +28,14 @@ export function StaffInviteModal({
   open: boolean;
   onClose: () => void;
 }) {
+  // Fetched only to map the chosen access level → the real Convex role name on
+  // submit (NOT for the dropdown display, which is hardcoded Admin / Cashier).
   const roles = useQuery(
     api.user.roles.listByApp,
     open ? { app: "admin" } : "skip",
   );
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
+  const [choice, setChoice] = useState<"admin" | "cashier">("cashier");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -41,22 +43,41 @@ export function StaffInviteModal({
   useEffect(() => {
     if (!open) {
       setEmail("");
-      setRole("");
+      setChoice("cashier");
       setError(null);
       setSubmitting(false);
       setDone(false);
     }
   }, [open]);
 
+  /** Resolve the chosen access level to an actual role name that exists. */
+  function resolveRoleName(): string | null {
+    const list = roles ?? [];
+    if (choice === "admin") {
+      // Prefer a role with "*" (Super Admin), else any role named "…Admin…".
+      const adminRole =
+        list.find((r) => r.permissions?.includes("*")) ??
+        list.find((r) => r.name.toLowerCase().includes("admin"));
+      return adminRole?.name ?? null;
+    }
+    const cashierRole = list.find((r) => r.name.toLowerCase() === "cashier");
+    return cashierRole?.name ?? "Cashier";
+  }
+
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
+    const roleName = resolveRoleName();
+    if (!roleName) {
+      setError("No matching role found. Make sure roles are seeded in Convex.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
       const res = await fetch("/api/staff/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), role }),
+        body: JSON.stringify({ email: email.trim(), role: roleName }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to send invitation.");
@@ -75,7 +96,7 @@ export function StaffInviteModal({
         <h2 className="text-xl font-semibold">Invite Staff</h2>
         {done ? (
           <div className="space-y-4">
-            <p className="text-sm text-emerald-700">
+            <p className="text-sm text-burgundy-700">
               Invitation sent to {email}. They&apos;ll get an email to set up
               their account with the chosen role.
             </p>
@@ -100,16 +121,16 @@ export function StaffInviteModal({
             </div>
             <div className="space-y-1.5">
               <Label>Role</Label>
-              <Select value={role} onValueChange={setRole}>
+              <Select
+                value={choice}
+                onValueChange={(v) => setChoice(v as "admin" | "cashier")}
+              >
                 <SelectTrigger className="h-11">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {(roles ?? []).map((r) => (
-                    <SelectItem key={r._id} value={r.name}>
-                      {r.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="cashier">Cashier</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -127,7 +148,7 @@ export function StaffInviteModal({
               <Button
                 type="submit"
                 className="h-11 flex-1"
-                disabled={submitting || !email.trim() || !role}
+                disabled={submitting || !email.trim() || roles === undefined}
               >
                 {submitting ? "Sending…" : "Send Invite"}
               </Button>

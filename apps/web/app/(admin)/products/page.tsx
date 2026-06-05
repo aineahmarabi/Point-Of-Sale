@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useCallback, useRef, useMemo } from "react";
 import type { ColumnFiltersState } from "@tanstack/react-table";
@@ -20,6 +20,7 @@ import { getColumns } from "./columns";
 import { DataTable } from "@/components/admin/module/data-table";
 import { PermissionGuard } from "@/components/admin/module/permission-guard";
 import { ProductForm, ProductDelete } from "./form";
+import { VariantsManager } from "@/components/admin/variants-manager";
 
 type FormSheetMode = "view" | "add" | "update";
 
@@ -37,6 +38,13 @@ export default function Products() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [toDelete, setToDelete] = useState<Doc<"products"> | undefined>();
+
+  const [variantsOpen, setVariantsOpen] = useState(false);
+  const [variantsProduct, setVariantsProduct] =
+    useState<Doc<"products"> | undefined>();
+
+  const settings = useQuery(api.settings.storeSettings.current);
+  const currency = settings?.currency ?? "KES";
 
   const handleView = useCallback((row: Doc<"products">) => {
     setSelected(row);
@@ -61,14 +69,20 @@ export default function Products() {
     setDeleteDialogOpen(true);
   }, []);
 
+  const handleManageVariants = useCallback((row: Doc<"products">) => {
+    setVariantsProduct(row);
+    setVariantsOpen(true);
+  }, []);
+
   const columns = useMemo(
     () =>
       getColumns({
         onView: handleView,
         onEdit: handleEdit,
         onDelete: handleDelete,
+        onManageVariants: handleManageVariants,
       }),
-    [handleView, handleEdit, handleDelete],
+    [handleView, handleEdit, handleDelete, handleManageVariants],
   );
 
   const search =
@@ -206,6 +220,12 @@ export default function Products() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         product={toDelete}
+      />
+      <VariantsManager
+        open={variantsOpen}
+        onClose={() => setVariantsOpen(false)}
+        product={variantsProduct}
+        currency={currency}
       />
     </main>
   );

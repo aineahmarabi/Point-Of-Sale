@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { Doc } from "@repo/backend/dataModel";
 
@@ -7,11 +7,11 @@ import { FormSheet } from "@/components/admin/module/form-sheet";
 type Session = Doc<"sessions"> & { cashier_name?: string | null };
 
 function money(value?: number): string {
-  return value != null ? value.toFixed(2) : "â€”";
+  return value != null ? value.toFixed(2) : "—";
 }
 
 function dateTime(ts?: number): string {
-  return ts ? new Date(ts).toLocaleString() : "â€”";
+  return ts ? new Date(ts).toLocaleString() : "—";
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -46,7 +46,7 @@ export function SessionView({
     >
       {session && (
         <dl className="flex flex-col">
-          <Row label="Cashier" value={session.cashier_name ?? "â€”"} />
+          <Row label="Cashier" value={session.cashier_name ?? "—"} />
           <Row label="Status" value={<span className="capitalize">{session.status}</span>} />
           <Row label="Opened At" value={dateTime(session.opened_at)} />
           <Row label="Closed At" value={dateTime(session.closed_at)} />
@@ -61,7 +61,7 @@ export function SessionView({
           <Row label="Cash Sales" value={money(session.cash_sales)} />
           <Row label="Other Sales" value={money(session.other_sales)} />
           <Row label="Transactions" value={session.transaction_count} />
-          <Row label="Notes" value={session.notes ?? "â€”"} />
+          <Row label="Notes" value={session.notes ?? "—"} />
         </dl>
       )}
     </FormSheet>

@@ -11,8 +11,10 @@ import { Input } from "@repo/ui/components/ui/input";
 
 import { useCart } from "@/context/cart-context";
 import { money } from "@/lib/format";
+import { VariantPickerModal } from "./variant-picker-modal";
 
 type Product = Doc<"products"> & { category_name?: string | null };
+type Variant = Doc<"variants">;
 
 interface StockInfo {
   quantity: number;
@@ -50,7 +52,7 @@ function StockBadge({
         "rounded-full px-2 py-0.5 text-xs font-medium",
         low
           ? "bg-amber-500/20 text-amber-300"
-          : "bg-emerald-500/20 text-emerald-300",
+          : "bg-green-500/20 text-green-300",
       )}
     >
       {stock.quantity} in stock
@@ -62,6 +64,8 @@ export function ProductGrid({ currency }: { currency: string }) {
   const { addItem } = useCart();
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<Id<"categories"> | "all">("all");
+  const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const categoriesResult = useQuery(api.catalog.categories.list, {
     paginationOpts: { numItems: 100, cursor: null },
@@ -74,6 +78,10 @@ export function ProductGrid({ currency }: { currency: string }) {
   });
   const inventoryResult = useQuery(api.catalog.inventory.list, {
     paginationOpts: { numItems: 200, cursor: null },
+  });
+  const variantsResult = useQuery(api.catalog.variants.list, {
+    paginationOpts: { numItems: 500, cursor: null },
+    status: "active",
   });
 
   const stockMap = useMemo(() => {
@@ -89,6 +97,47 @@ export function ProductGrid({ currency }: { currency: string }) {
     }
     return map;
   }, [inventoryResult]);
+
+  const variantMap = useMemo(() => {
+    const map = new Map<string, Variant[]>();
+    for (const v of variantsResult?.page ?? []) {
+      const list = map.get(v.product_id) ?? [];
+      list.push(v);
+      map.set(v.product_id, list);
+    }
+    return map;
+  }, [variantsResult]);
+
+  function handleProductClick(product: Product) {
+    const variants = (variantMap.get(product._id) ?? []).filter(
+      (v) => v.status === "active",
+    );
+    if (variants.length > 0) {
+      setPickerProduct(product);
+      setPickerOpen(true);
+      return;
+    }
+    addItem({
+      product_id: product._id,
+      product_name: product.name,
+      sku: product.sku ?? "",
+      unit_price: product.selling_price,
+      tax_rate: product.tax_rate ?? 0,
+    });
+  }
+
+  function handleVariantSelect(variant: Variant) {
+    if (!pickerProduct) return;
+    addItem({
+      product_id: pickerProduct._id,
+      variant_id: variant._id,
+      product_name: `${pickerProduct.name} — ${variant.name}`,
+      sku: variant.sku ?? pickerProduct.sku ?? "",
+      unit_price: variant.price_override ?? pickerProduct.selling_price,
+      tax_rate: pickerProduct.tax_rate ?? 0,
+    });
+    setPickerOpen(false);
+  }
 
   const products = useMemo(() => {
     const all = (productsResult?.page ?? []) as Product[];
@@ -114,7 +163,7 @@ export function ProductGrid({ currency }: { currency: string }) {
           placeholder="Search by name, SKU or barcode…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-12 border-slate-700 bg-slate-800 text-base text-slate-100 placeholder:text-slate-500 focus-visible:ring-emerald-500"
+          className="h-12 border-slate-700 bg-slate-800 text-base text-slate-100 placeholder:text-slate-500 focus-visible:ring-burgundy-500"
           autoFocus
         />
       </div>
@@ -155,6 +204,9 @@ export function ProductGrid({ currency }: { currency: string }) {
             {products.map((product) => {
               const stock = stockMap.get(product._id);
               const outOfStock = !product.is_service && stock?.quantity === 0;
+              const variantCount = (variantMap.get(product._id) ?? []).filter(
+                (v) => v.status === "active",
+              ).length;
               const imageUrl = product.images?.[0]?.startsWith("http")
                 ? product.images[0]
                 : null;
@@ -162,15 +214,7 @@ export function ProductGrid({ currency }: { currency: string }) {
                 <button
                   key={product._id}
                   type="button"
-                  onClick={() =>
-                    addItem({
-                      product_id: product._id,
-                      product_name: product.name,
-                      sku: product.sku ?? "",
-                      unit_price: product.selling_price,
-                      tax_rate: product.tax_rate ?? 0,
-                    })
-                  }
+                  onClick={() => handleProductClick(product)}
                   className={cn(
                     "flex min-h-[150px] flex-col rounded-lg bg-slate-700 p-3 text-left transition hover:bg-slate-600 active:scale-[0.98]",
                     outOfStock && "opacity-50",
@@ -195,11 +239,16 @@ export function ProductGrid({ currency }: { currency: string }) {
                   <div className="line-clamp-2 text-sm font-bold leading-tight text-white">
                     {product.name}
                   </div>
-                  <div className="mt-1 text-base font-bold text-emerald-400">
+                  <div className="mt-1 text-base font-bold text-burgundy-400">
                     {money(product.selling_price, currency)}
                   </div>
-                  <div className="mt-auto pt-2">
+                  <div className="mt-auto flex items-center justify-between gap-1 pt-2">
                     <StockBadge product={product} stock={stock} />
+                    {variantCount > 0 && (
+                      <span className="rounded-full bg-slate-600 px-2 py-0.5 text-[10px] font-medium text-slate-200">
+                        {variantCount} options
+                      </span>
+                    )}
                   </div>
                 </button>
               );
@@ -207,6 +256,17 @@ export function ProductGrid({ currency }: { currency: string }) {
           </div>
         )}
       </div>
+
+      <VariantPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        product={pickerProduct}
+        variants={
+          pickerProduct ? (variantMap.get(pickerProduct._id) ?? []) : []
+        }
+        currency={currency}
+        onSelect={handleVariantSelect}
+      />
     </div>
   );
 }
@@ -227,7 +287,7 @@ function CategoryPill({
       className={cn(
         "h-10 shrink-0 whitespace-nowrap rounded-full px-4 text-sm font-medium transition",
         active
-          ? "bg-emerald-500 text-white"
+          ? "bg-burgundy-500 text-white"
           : "bg-slate-700 text-slate-300 hover:bg-slate-600",
       )}
     >

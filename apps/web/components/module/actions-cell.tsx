@@ -45,7 +45,7 @@ export function ActionsCell<T>({
           <DropdownMenuContent align="end">
             {onView && (
               <DropdownMenuItem onClick={() => onView(row)}>
-                <Icon icon={ViewIcon} size={16} className="text-emerald-600" />
+                <Icon icon={ViewIcon} size={16} className="text-burgundy-600" />
                 View
               </DropdownMenuItem>
             )}
@@ -84,7 +84,7 @@ export function ActionsCell<T>({
           className="h-8 w-8"
           onClick={() => onView(row)}
         >
-          <Icon icon={ViewIcon} size={16} className="text-emerald-600" />
+          <Icon icon={ViewIcon} size={16} className="text-burgundy-600" />
           <span className="sr-only">View</span>
         </Button>
       )}

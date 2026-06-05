@@ -1,2 +1,29 @@
 @import "tailwindcss";
 @import "@repo/tailwind/base.css";
+
+/* ── Burgundy brand palette ──────────────────────────────────── */
+@theme {
+  --color-burgundy-50: #fbf2f4;
+  --color-burgundy-100: #f7e3e7;
+  --color-burgundy-200: #efc6cf;
+  --color-burgundy-300: #e09aa9;
+  --color-burgundy-400: #cf6076;
+  --color-burgundy-500: #b03a52;
+  --color-burgundy-600: #8e1f38;
+  --color-burgundy-700: #761a2f;
+  --color-burgundy-800: #5f1727;
+  --color-burgundy-900: #4f1623;
+}
+
+/* Make the shadcn primary token burgundy (overrides the shared green default). */
+:root {
+  --primary: #8e1f38;
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: #8e1f38;
+}
+
+.dark {
+  --primary: #b03a52;
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: #b03a52;
+}
