@@ -23,6 +23,7 @@ interface CustomerModalProps {
 export function CustomerModal({ open, onClose, onSelect }: CustomerModalProps) {
   const [tab, setTab] = useState<"search" | "new">("search");
   const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -44,6 +45,7 @@ export function CustomerModal({ open, onClose, onSelect }: CustomerModalProps) {
     if (!open) {
       setTab("search");
       setSearch("");
+      setSelectedId(null);
       setName("");
       setPhone("");
       setEmail("");
@@ -93,17 +95,18 @@ export function CustomerModal({ open, onClose, onSelect }: CustomerModalProps) {
       className="bg-slate-800 text-slate-100 sm:border sm:border-slate-700"
     >
       <div className="space-y-4 p-6">
-        <h2 className="text-xl font-bold text-white">Customer</h2>
+        <h2 className="text-xl font-bold text-white">Add Customer</h2>
 
-        <div className="inline-flex w-full rounded-lg bg-slate-900 p-1 text-sm">
+        {/* Pill tabs */}
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setTab("search")}
             className={cn(
-              "flex-1 rounded-md px-3 py-2 font-medium transition",
+              "flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition",
               tab === "search"
-                ? "bg-burgundy-500 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200",
+                ? "bg-burgundy-500 text-white"
+                : "bg-slate-700 text-slate-300 hover:bg-slate-600",
             )}
           >
             Search
@@ -112,10 +115,10 @@ export function CustomerModal({ open, onClose, onSelect }: CustomerModalProps) {
             type="button"
             onClick={() => setTab("new")}
             className={cn(
-              "flex-1 rounded-md px-3 py-2 font-medium transition",
+              "flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition",
               tab === "new"
-                ? "bg-burgundy-500 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200",
+                ? "bg-burgundy-500 text-white"
+                : "bg-slate-700 text-slate-300 hover:bg-slate-600",
             )}
           >
             New Customer
@@ -128,44 +131,64 @@ export function CustomerModal({ open, onClose, onSelect }: CustomerModalProps) {
               <HugeiconsIcon
                 icon={Search01Icon}
                 size={18}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name…"
-                className="h-11 border-slate-600 bg-slate-900 pl-10 text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
+                className="h-11 border-slate-600 bg-slate-700 pl-10 text-white placeholder:text-slate-400 focus-visible:ring-burgundy-500"
                 autoFocus
               />
             </div>
             <div className="max-h-64 space-y-2 overflow-y-auto">
               {results === undefined ? (
-                <p className="text-sm text-slate-400">Loading…</p>
+                <p className="py-6 text-center text-sm text-slate-400">
+                  Loading…
+                </p>
               ) : results.page.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-6 text-center">
-                  <p className="text-sm font-medium text-slate-300">
-                    No customers found
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Try a different name, or add a new customer.
-                  </p>
-                </div>
+                <p className="py-8 text-center text-sm text-slate-400">
+                  No customers found
+                </p>
               ) : (
-                results.page.map((c) => (
-                  <button
-                    key={c._id}
-                    type="button"
-                    onClick={() => onSelect(c)}
-                    className="flex w-full flex-col rounded-xl border border-slate-700 bg-slate-900/50 p-3 text-left transition hover:bg-slate-700/50"
-                  >
-                    <span className="text-sm font-semibold text-white">
-                      {c.name}
-                    </span>
-                    <span className="text-xs text-slate-400">
-                      {[c.email, c.phone].filter(Boolean).join(" · ") || "—"}
-                    </span>
-                  </button>
-                ))
+                results.page.map((c) => {
+                  const selected = selectedId === c._id;
+                  return (
+                    <button
+                      key={c._id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedId(c._id);
+                        onSelect(c);
+                      }}
+                      className={cn(
+                        "flex w-full flex-col gap-0.5 rounded-xl border bg-slate-700 p-3 text-left transition hover:bg-slate-600",
+                        selected
+                          ? "border-burgundy-500"
+                          : "border-slate-600",
+                      )}
+                    >
+                      <span className="text-sm font-bold text-white">
+                        {c.name}
+                      </span>
+                      {c.email ? (
+                        <span className="text-xs text-slate-400">
+                          {c.email}
+                        </span>
+                      ) : null}
+                      {c.phone ? (
+                        <span className="text-xs text-slate-400">
+                          {c.phone}
+                        </span>
+                      ) : null}
+                      {!c.email && !c.phone ? (
+                        <span className="text-xs text-slate-500">
+                          No contact details
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })
               )}
             </div>
           </div>
@@ -180,34 +203,35 @@ export function CustomerModal({ open, onClose, onSelect }: CustomerModalProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="h-11 border-slate-600 bg-slate-900 text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
+                placeholder="Full name"
+                className="h-11 border-slate-600 bg-slate-700 text-white placeholder:text-slate-400 focus-visible:ring-burgundy-500"
                 autoFocus
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="cust-phone" className="text-slate-300">
-                  Phone
-                </Label>
-                <Input
-                  id="cust-phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="h-11 border-slate-600 bg-slate-900 text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="cust-email" className="text-slate-300">
-                  Email
-                </Label>
-                <Input
-                  id="cust-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 border-slate-600 bg-slate-900 text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-email" className="text-slate-300">
+                Email
+              </Label>
+              <Input
+                id="cust-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="h-11 border-slate-600 bg-slate-700 text-white placeholder:text-slate-400 focus-visible:ring-burgundy-500"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-phone" className="text-slate-300">
+                Phone
+              </Label>
+              <Input
+                id="cust-phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+254 700 000 000"
+                className="h-11 border-slate-600 bg-slate-700 text-white placeholder:text-slate-400 focus-visible:ring-burgundy-500"
+              />
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <Button
@@ -215,14 +239,14 @@ export function CustomerModal({ open, onClose, onSelect }: CustomerModalProps) {
               className="h-11 w-full bg-burgundy-500 font-bold text-white hover:bg-burgundy-600 disabled:bg-slate-600 disabled:text-slate-400"
               disabled={submitting || !name.trim()}
             >
-              {submitting ? "Saving…" : "Create & Attach"}
+              {submitting ? "Saving…" : "Save Customer"}
             </Button>
           </form>
         )}
 
         <Button
-          variant="ghost"
-          className="h-11 w-full text-slate-300 hover:bg-slate-700 hover:text-white"
+          variant="outline"
+          className="h-11 w-full border-slate-600 bg-transparent text-white hover:bg-slate-700 hover:text-white"
           onClick={onClose}
         >
           Cancel

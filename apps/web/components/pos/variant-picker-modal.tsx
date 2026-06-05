@@ -27,15 +27,19 @@ export function VariantPickerModal({
   const active = variants.filter((v) => v.status === "active");
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      className="bg-slate-800 text-slate-100 sm:border sm:border-slate-700"
+    >
       <div className="space-y-4 p-6">
         <div>
-          <h2 className="text-xl font-semibold">{product?.name}</h2>
-          <p className="text-muted-foreground text-sm">Choose a variant</p>
+          <h2 className="text-xl font-bold text-white">{product?.name}</h2>
+          <p className="text-sm text-slate-400">Choose a variant</p>
         </div>
 
         {active.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-slate-400">
             No variants available for this product.
           </p>
         ) : (
@@ -47,10 +51,12 @@ export function VariantPickerModal({
                   key={v._id}
                   type="button"
                   onClick={() => onSelect(v)}
-                  className="hover:border-burgundy-600 flex min-h-[64px] flex-col items-start justify-center rounded-lg border-2 border-zinc-200 p-3 text-left transition"
+                  className="flex min-h-[64px] flex-col items-start justify-center rounded-lg border-2 border-slate-600 bg-slate-700 p-3 text-left transition hover:border-burgundy-500 hover:bg-slate-600"
                 >
-                  <span className="text-sm font-semibold">{v.name}</span>
-                  <span className="text-burgundy-600 text-sm font-bold">
+                  <span className="text-sm font-semibold text-white">
+                    {v.name}
+                  </span>
+                  <span className="text-sm font-bold text-emerald-400">
                     {money(price, currency)}
                   </span>
                 </button>
@@ -59,7 +65,11 @@ export function VariantPickerModal({
           </div>
         )}
 
-        <Button variant="ghost" className="h-11 w-full" onClick={onClose}>
+        <Button
+          variant="outline"
+          className="h-11 w-full border-slate-600 bg-transparent text-white hover:bg-slate-700 hover:text-white"
+          onClick={onClose}
+        >
           Cancel
         </Button>
       </div>
