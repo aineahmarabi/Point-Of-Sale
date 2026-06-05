@@ -4,14 +4,9 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
 
 import { ActionsCell } from "@/components/admin/module/actions-cell";
+import { StatusBadge } from "@/components/admin/status-badge";
 
 type Product = Doc<"products"> & { category_name?: string | null };
-
-const statusStyles: Record<string, string> = {
-  active: "bg-green-100 text-green-800",
-  draft: "bg-yellow-100 text-yellow-800",
-  archived: "bg-gray-100 text-gray-800",
-};
 
 interface ActionCallbacks {
   onView: (row: Product) => void;
@@ -42,16 +37,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Product>[] {
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue<string>("status");
-        return (
-          <span
-            className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${statusStyles[status] ?? ""}`}
-          >
-            {status}
-          </span>
-        );
-      },
+      cell: ({ row }) => <StatusBadge status={row.getValue<string>("status")} />,
     },
     {
       accessorKey: "category_name",

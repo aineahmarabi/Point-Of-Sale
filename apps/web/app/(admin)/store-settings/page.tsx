@@ -19,8 +19,47 @@ import { Input } from "@repo/ui/components/ui/input";
 import { Textarea } from "@repo/ui/components/ui/textarea";
 import { Switch } from "@repo/ui/components/ui/switch";
 import { Button } from "@repo/ui/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
 
 import { PermissionGuard } from "@/components/admin/module/permission-guard";
+import { notifyError, notifySuccess } from "@/lib/errors";
+
+const CURRENCIES = [
+  { value: "KES", label: "KES - Kenyan Shilling" },
+  { value: "UGX", label: "UGX - Ugandan Shilling" },
+  { value: "TZS", label: "TZS - Tanzanian Shilling" },
+  { value: "RWF", label: "RWF - Rwandan Franc" },
+  { value: "ETB", label: "ETB - Ethiopian Birr" },
+  { value: "USD", label: "USD - US Dollar" },
+  { value: "EUR", label: "EUR - Euro" },
+  { value: "GBP", label: "GBP - British Pound" },
+] as const;
+
+const TIMEZONES = [
+  { value: "Africa/Nairobi", label: "Africa/Nairobi - Nairobi, Kenya" },
+  { value: "Africa/Kampala", label: "Africa/Kampala - Kampala, Uganda" },
+  {
+    value: "Africa/Dar_es_Salaam",
+    label: "Africa/Dar_es_Salaam - Dar es Salaam, Tanzania",
+  },
+  { value: "Africa/Kigali", label: "Africa/Kigali - Kigali, Rwanda" },
+  {
+    value: "Africa/Addis_Ababa",
+    label: "Africa/Addis_Ababa - Addis Ababa, Ethiopia",
+  },
+  {
+    value: "Africa/Mogadishu",
+    label: "Africa/Mogadishu - Mogadishu, Somalia",
+  },
+  { value: "Africa/Juba", label: "Africa/Juba - Juba, South Sudan" },
+  { value: "UTC", label: "UTC - UTC" },
+] as const;
 
 const storeSettingsSchema = z.object({
   store_name: z.string().min(1, "Store name is required"),
@@ -97,23 +136,22 @@ export default function StoreSettings() {
         require_customer_on_sale: values.require_customer_on_sale,
       });
       setSaved(true);
+      notifySuccess("Settings saved.");
     } catch (err) {
       const message =
         err instanceof ConvexError
           ? (err.data as string)
           : "An unexpected error occurred. Please try again.";
       setError(message);
+      notifyError(err);
     }
   }
 
   return (
-    <main className="flex flex-1 flex-col overflow-y-auto">
+    <main className="h-full overflow-x-hidden overflow-y-auto">
       <div className="mx-auto w-full max-w-2xl px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold tracking-tight">
-            Store Settings
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="text-muted-foreground text-sm">
             Configure your store details, receipts and selling rules.
           </p>
         </div>
@@ -144,9 +182,23 @@ export default function StoreSettings() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Currency</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="KES" />
-                    </FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CURRENCIES.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -157,9 +209,23 @@ export default function StoreSettings() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Timezone</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Africa/Nairobi" />
-                    </FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select timezone" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TIMEZONES.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

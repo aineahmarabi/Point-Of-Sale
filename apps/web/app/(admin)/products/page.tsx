@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import type { ColumnFiltersState } from "@tanstack/react-table";
 import { useQuery } from "convex/react";
 import { api } from "@repo/backend";
@@ -19,21 +20,17 @@ import { Button } from "@repo/ui/components/ui/button";
 import { getColumns } from "./columns";
 import { DataTable } from "@/components/admin/module/data-table";
 import { PermissionGuard } from "@/components/admin/module/permission-guard";
-import { ProductForm, ProductDelete } from "./form";
+import { ProductDelete } from "./form";
 import { VariantsManager } from "@/components/admin/variants-manager";
-
-type FormSheetMode = "view" | "add" | "update";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export default function Products() {
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_OPTIONS[0]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [showCount, setShowCount] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [sheetMode, setSheetMode] = useState<FormSheetMode>("view");
-  const [selected, setSelected] = useState<Doc<"products"> | undefined>();
   const cursorsRef = useRef<Map<string, string>>(new Map());
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -46,23 +43,20 @@ export default function Products() {
   const settings = useQuery(api.settings.storeSettings.current);
   const currency = settings?.currency ?? "KES";
 
-  const handleView = useCallback((row: Doc<"products">) => {
-    setSelected(row);
-    setSheetMode("view");
-    setSheetOpen(true);
-  }, []);
+  const handleView = useCallback(
+    (row: Doc<"products">) => router.push(`/products/${row._id}/edit`),
+    [router],
+  );
 
-  const handleNew = useCallback(() => {
-    setSelected(undefined);
-    setSheetMode("add");
-    setSheetOpen(true);
-  }, []);
+  const handleNew = useCallback(
+    () => router.push("/products/new"),
+    [router],
+  );
 
-  const handleEdit = useCallback((row: Doc<"products">) => {
-    setSelected(row);
-    setSheetMode("update");
-    setSheetOpen(true);
-  }, []);
+  const handleEdit = useCallback(
+    (row: Doc<"products">) => router.push(`/products/${row._id}/edit`),
+    [router],
+  );
 
   const handleDelete = useCallback((row: Doc<"products">) => {
     setToDelete(row);
@@ -209,12 +203,6 @@ export default function Products() {
         onRequestCount={() => setShowCount(true)}
         columnFilters={columnFilters}
         hiddenOnMobile={["sku", "status", "category_name"]}
-      />
-      <ProductForm
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        mode={sheetMode}
-        product={selected}
       />
       <ProductDelete
         open={deleteDialogOpen}

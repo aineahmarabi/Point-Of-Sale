@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
 import { query, mutation } from "../_generated/server";
 import { inventory } from "../validators";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { assertPermission, getAuthUser } from "../auth.helpers";
 
 export const list = query({
@@ -121,8 +121,21 @@ export const adjustStock = mutation({
       )
       .first();
     if (!record) return null;
+
+    const newQuantity = record.quantity - args.quantity;
+    // Block overselling unless the store explicitly allows negative stock.
+    if (newQuantity < 0) {
+      const settings = await ctx.db.query("store_settings").first();
+      if (!settings?.allow_negative_stock) {
+        const product = await ctx.db.get(args.product_id);
+        throw new ConvexError(
+          `Insufficient stock for ${product?.name ?? "this item"}. Only ${record.quantity} left.`,
+        );
+      }
+    }
+
     await ctx.db.patch(record._id, {
-      quantity: record.quantity - args.quantity,
+      quantity: newQuantity,
     });
     // Audit the stock movement caused by the sale.
     const { user } = await getAuthUser(ctx);

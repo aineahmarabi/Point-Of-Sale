@@ -11,6 +11,7 @@ import { Label } from "@repo/ui/components/ui/label";
 
 import { Modal } from "@/components/pos/modal";
 import { money } from "@/lib/format";
+import { notifyError, notifySuccess } from "@/lib/errors";
 
 export function VariantsManager({
   open,
@@ -57,12 +58,14 @@ export function VariantsManager({
       setName("");
       setSku("");
       setPrice("");
+      notifySuccess("Variant added.");
     } catch (err) {
       setError(
         err instanceof ConvexError
           ? (err.data as string)
           : "Failed to add variant.",
       );
+      notifyError(err);
     } finally {
       setSubmitting(false);
     }
@@ -100,7 +103,11 @@ export function VariantsManager({
                 </div>
                 <button
                   type="button"
-                  onClick={() => removeVariant({ id: v._id })}
+                  onClick={() =>
+                    removeVariant({ id: v._id })
+                      .then(() => notifySuccess("Variant removed."))
+                      .catch(notifyError)
+                  }
                   className="text-xs font-medium text-red-600 hover:underline"
                 >
                   Delete

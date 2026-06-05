@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@repo/backend";
@@ -9,6 +9,31 @@ import { DataProvider } from "@repo/auth/providers";
 
 import { isAdminRole } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { PageHeader } from "@/components/admin/page-header";
+
+/** Route segment → human page title for the shared header. */
+const PAGE_TITLES: Record<string, string> = {
+  dashboard: "Dashboard",
+  analytics: "Analytics",
+  products: "Products",
+  categories: "Categories",
+  inventory: "Inventory",
+  "inventory-adjustments": "Inventory Adjustments",
+  suppliers: "Suppliers",
+  "purchase-orders": "Purchase Orders",
+  customers: "Customers",
+  discounts: "Discounts",
+  orders: "Orders",
+  sessions: "Sessions",
+  "tax-rates": "Tax Rates",
+  "store-settings": "Store Settings",
+  staff: "Staff",
+};
+
+function titleForPath(pathname: string): string {
+  const segment = pathname.split("/").filter(Boolean)[0] ?? "";
+  return PAGE_TITLES[segment] ?? "Admin";
+}
 
 function FullScreenLoader() {
   return (
@@ -30,6 +55,7 @@ function AdminShell({
   children: ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <div className="flex h-screen overflow-hidden overflow-x-hidden bg-white">
@@ -39,21 +65,24 @@ function AdminShell({
         user={user}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-slate-100">
-        {/* Mobile top bar with hamburger */}
-        <div className="flex shrink-0 items-center gap-3 border-b bg-white px-4 py-3 md:hidden">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open menu"
-            className="text-xl leading-none"
-          >
-            ☰
-          </button>
-          <span className="font-semibold">Admin</span>
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-slate-100">
+        <PageHeader
+          title={titleForPath(pathname)}
+          leading={
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+              className="text-xl leading-none text-slate-700 md:hidden"
+            >
+              ☰
+            </button>
+          }
+        />
 
-        {children}
+        <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );

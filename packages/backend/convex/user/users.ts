@@ -2,7 +2,7 @@ import { query, mutation } from "../_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { users, userApps } from "../validators";
 import { ConvexError, v } from "convex/values";
-import { Id } from "../_generated/dataModel";
+import { Doc, Id } from "../_generated/dataModel";
 import { assertPermission, getAuthUser } from "../auth.helpers";
 
 export const currentUser = query({
@@ -190,10 +190,68 @@ export const updateStaff = mutation({
     if (user._id === args.id) {
       throw new ConvexError("You cannot edit your own account.");
     }
+    const target = await ctx.db.get(args.id);
+    if (!target) {
+      throw new ConvexError("Staff member not found.");
+    }
+    if (args.role) {
+      const role = await ctx.db.get(args.role);
+      if (!role) {
+        throw new ConvexError("Selected role no longer exists.");
+      }
+    }
     await ctx.db.patch(args.id, {
       status: args.status,
-      ...(args.role ? { role: args.role } : {}),
+      ...(args.role
+        ? {
+            role: args.role,
+            // Keep is_admin in sync with whether the role grants admin access.
+            is_admin: await roleIsAdmin(ctx, args.role),
+          }
+        : {}),
     });
     return args.id;
+  },
+});
+
+/** True when a role carries wildcard or admin-level access. */
+async function roleIsAdmin(
+  ctx: { db: { get: (id: Id<"roles">) => Promise<Doc<"roles"> | null> } },
+  roleId: Id<"roles">,
+): Promise<boolean> {
+  const role = await ctx.db.get(roleId);
+  if (!role) return false;
+  return (
+    role.permissions?.includes("*") ||
+    role.name.toLowerCase().includes("admin") ||
+    role.app === "admin"
+  );
+}
+
+/**
+ * Assign a role to a user and mark them active. Used by staff management and
+ * the invite-acceptance flow so accounts never end up role-less.
+ */
+export const assignRole = mutation({
+  args: {
+    userId: v.id("users"),
+    roleId: v.id("roles"),
+  },
+  handler: async (ctx, args) => {
+    await assertPermission(ctx, "staff:update");
+    const target = await ctx.db.get(args.userId);
+    if (!target) {
+      throw new ConvexError("User not found.");
+    }
+    const role = await ctx.db.get(args.roleId);
+    if (!role) {
+      throw new ConvexError("Role not found.");
+    }
+    await ctx.db.patch(args.userId, {
+      role: args.roleId,
+      status: "active",
+      is_admin: await roleIsAdmin(ctx, args.roleId),
+    });
+    return args.userId;
   },
 });

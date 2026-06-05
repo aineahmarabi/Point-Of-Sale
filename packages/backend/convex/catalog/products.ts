@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server";
 import { query, mutation } from "../_generated/server";
 import { slugify } from "@repo/lib/utils";
 import { products } from "../validators";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { assertPermission } from "../auth.helpers";
 
 const { slug: _slug, ...productsArgs } = products;
@@ -114,6 +114,17 @@ export const create = mutation({
   handler: async (ctx, args) => {
     await assertPermission(ctx, "products:create");
     const { name, ...rest } = args;
+    if (rest.sku) {
+      const existing = await ctx.db
+        .query("products")
+        .withIndex("by_sku", (q) => q.eq("sku", rest.sku))
+        .first();
+      if (existing) {
+        throw new ConvexError(
+          `A product with SKU "${rest.sku}" already exists.`,
+        );
+      }
+    }
     const slug = slugify(name);
     return await ctx.db.insert("products", { name, ...rest, slug });
   },
@@ -124,6 +135,17 @@ export const update = mutation({
   handler: async (ctx, args) => {
     await assertPermission(ctx, "products:update");
     const { id, name, ...rest } = args;
+    if (rest.sku) {
+      const clash = await ctx.db
+        .query("products")
+        .withIndex("by_sku", (q) => q.eq("sku", rest.sku))
+        .first();
+      if (clash && clash._id !== id) {
+        throw new ConvexError(
+          `A product with SKU "${rest.sku}" already exists.`,
+        );
+      }
+    }
     const slug = slugify(name);
     return await ctx.db.patch(id, { name, ...rest, slug });
   },

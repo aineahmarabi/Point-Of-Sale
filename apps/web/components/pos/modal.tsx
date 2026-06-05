@@ -31,7 +31,7 @@ export function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4">
       <div
         className="absolute inset-0 bg-black/60"
         aria-hidden
@@ -41,7 +41,8 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "bg-background relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl shadow-2xl",
+          // Full-screen on mobile, centered card from sm upwards.
+          "bg-background relative z-10 flex h-full w-full flex-col overflow-y-auto shadow-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-md sm:rounded-xl",
           className,
         )}
       >

@@ -15,6 +15,7 @@ import { Modal } from "./modal";
 import { Receipt, type ReceiptData } from "./receipt";
 import { useCart } from "@/context/cart-context";
 import { money, cashierName } from "@/lib/format";
+import { notifyError } from "@/lib/errors";
 
 interface PaymentModalProps {
   open: boolean;
@@ -211,6 +212,7 @@ export function PaymentModal({
           ? (err.data as string)
           : "Payment failed. Please try again.";
       setError(message);
+      notifyError(err);
       setPhase("form");
     }
   }
@@ -229,7 +231,7 @@ export function PaymentModal({
     <Modal open={open} onClose={onClose} dismissable={phase !== "processing"}>
       {phase === "success" ? (
         <div className="space-y-6 p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-burgundy-100 text-3xl text-burgundy-700">
+          <div className="animate-checkmark mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl text-green-600">
             ✓
           </div>
           <div>

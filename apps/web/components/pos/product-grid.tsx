@@ -192,9 +192,18 @@ export function ProductGrid({ currency }: { currency: string }) {
       {/* Grid */}
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {productsResult === undefined ? (
-          <p className="p-8 text-center text-sm text-slate-500">
-            Loading products…
-          </p>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex min-h-[150px] flex-col rounded-lg bg-slate-700 p-3"
+              >
+                <div className="shimmer mb-2 aspect-square rounded-md" />
+                <div className="shimmer mb-2 h-3.5 w-3/4 rounded" />
+                <div className="shimmer h-3 w-1/2 rounded" />
+              </div>
+            ))}
+          </div>
         ) : products.length === 0 ? (
           <p className="p-8 text-center text-sm text-slate-500">
             No products found.

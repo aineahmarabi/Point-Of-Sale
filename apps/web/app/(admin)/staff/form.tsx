@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
 import { api } from "@repo/backend";
@@ -18,6 +18,7 @@ import {
 } from "@repo/ui/components/ui/select";
 
 import { Modal } from "@/components/pos/modal";
+import { notifyError, notifySuccess } from "@/lib/errors";
 
 type Staff = Doc<"users"> & { role_name?: string | null };
 
@@ -81,11 +82,13 @@ export function StaffInviteModal({
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to send invitation.");
+      notifySuccess(`Invitation sent to ${email.trim()}.`);
       setDone(true);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to send invitation.",
       );
+      notifyError(err);
       setSubmitting(false);
     }
   }
@@ -160,6 +163,23 @@ export function StaffInviteModal({
   );
 }
 
+/** Resolve "Admin"/"Cashier" choice to a real Convex role _id. */
+function resolveRoleId(
+  choice: "admin" | "cashier",
+  roles: Doc<"roles">[],
+): Id<"roles"> | null {
+  if (choice === "admin") {
+    const adminRole =
+      roles.find((r) => r.permissions?.includes("*")) ??
+      roles.find((r) => r.name.toLowerCase().includes("admin"));
+    return adminRole?._id ?? null;
+  }
+  const cashierRole =
+    roles.find((r) => r.name.toLowerCase() === "cashier") ??
+    roles.find((r) => r.name.toLowerCase().includes("cashier"));
+  return cashierRole?._id ?? null;
+}
+
 export function StaffEditModal({
   open,
   onClose,
@@ -169,35 +189,50 @@ export function StaffEditModal({
   onClose: () => void;
   staff?: Staff;
 }) {
-  const roles = useQuery(
-    api.user.roles.listByApp,
-    open ? { app: "admin" } : "skip",
+  // Fetch ALL roles (every app) so we can resolve Admin/Cashier regardless of
+  // which app a role is registered under.
+  const rolesResult = useQuery(
+    api.user.roles.list,
+    open ? { paginationOpts: { numItems: 100, cursor: null } } : "skip",
   );
+  const roles = useMemo(() => rolesResult?.page ?? [], [rolesResult]);
   const updateStaff = useMutation(api.user.users.updateStaff);
-  const [roleId, setRoleId] = useState("");
+  const [choice, setChoice] = useState<"admin" | "cashier">("cashier");
   const [status, setStatus] = useState<(typeof userStatus)[number]>("active");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && staff) {
-      setRoleId(staff.role ?? "");
+      // Derive the current access level: a wildcard/admin role → "admin".
+      const currentRole = roles.find((r) => r._id === staff.role);
+      const isAdmin =
+        currentRole?.permissions?.includes("*") ??
+        currentRole?.name.toLowerCase().includes("admin") ??
+        staff.is_admin;
+      setChoice(isAdmin ? "admin" : "cashier");
       setStatus(staff.status);
       setError(null);
       setSubmitting(false);
     }
-  }, [open, staff]);
+  }, [open, staff, roles]);
 
   async function handleSave() {
     if (!staff) return;
+    const roleId = resolveRoleId(choice, roles);
+    if (!roleId) {
+      setError("No matching role found. Make sure roles are seeded in Convex.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
       await updateStaff({
         id: staff._id,
-        ...(roleId ? { role: roleId as Id<"roles"> } : {}),
+        role: roleId,
         status,
       });
+      notifySuccess("Staff member updated.");
       onClose();
     } catch (err) {
       setError(
@@ -205,6 +240,7 @@ export function StaffEditModal({
           ? (err.data as string)
           : "Failed to update staff.",
       );
+      notifyError(err);
       setSubmitting(false);
     }
   }
@@ -222,16 +258,16 @@ export function StaffEditModal({
         )}
         <div className="space-y-1.5">
           <Label>Role</Label>
-          <Select value={roleId} onValueChange={setRoleId}>
+          <Select
+            value={choice}
+            onValueChange={(v) => setChoice(v as "admin" | "cashier")}
+          >
             <SelectTrigger className="h-11">
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent>
-              {(roles ?? []).map((r) => (
-                <SelectItem key={r._id} value={r._id}>
-                  {r.name}
-                </SelectItem>
-              ))}
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="cashier">Cashier</SelectItem>
             </SelectContent>
           </Select>
         </div>

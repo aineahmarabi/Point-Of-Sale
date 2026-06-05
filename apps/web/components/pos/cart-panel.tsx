@@ -96,7 +96,7 @@ export function CartPanel({
         ) : (
           <ul className="divide-y divide-slate-700">
             {items.map((item) => (
-              <li key={item.key} className="px-5 py-3">
+              <li key={item.key} className="animate-slide-in px-5 py-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-slate-100">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import { kumbhSans, poltawskiSerif, geistMono } from "@repo/assets/fonts";
 import { AuthProvider } from "@repo/auth/providers";
 import "./globals.css";
@@ -19,6 +20,7 @@ export default function RootLayout({
         className={`${kumbhSans.variable} ${poltawskiSerif.variable} ${geistMono.variable} h-full overflow-x-hidden`}
       >
         <AuthProvider>{children}</AuthProvider>
+        <Toaster richColors closeButton position="top-right" />
       </body>
     </html>
   );

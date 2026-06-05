@@ -164,6 +164,15 @@ export const create = mutation({
   args: sessions,
   handler: async (ctx, args) => {
     await assertPermission(ctx, "pos:open_session");
+    const existingOpen = await ctx.db
+      .query("sessions")
+      .withIndex("by_cashier_status", (q) =>
+        q.eq("cashier_id", args.cashier_id).eq("status", "open"),
+      )
+      .first();
+    if (existingOpen) {
+      throw new ConvexError("You already have an open session.");
+    }
     return await ctx.db.insert("sessions", args);
   },
 });

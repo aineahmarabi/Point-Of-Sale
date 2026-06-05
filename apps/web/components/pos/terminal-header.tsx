@@ -23,31 +23,71 @@ export function TerminalHeader({ session }: { session: Doc<"sessions"> }) {
   }, []);
 
   const storeName = settings?.store_name ?? "POS Terminal";
-  const roleName = currentUser?.role?.name;
+  const fullName = cashierName(currentUser);
+
+  // Normalise the role to the two access levels cashiers understand.
+  const isAdmin =
+    currentUser?.role?.permissions?.includes("*") ||
+    currentUser?.role?.name?.toLowerCase().includes("admin") ||
+    !!currentUser?.is_admin;
+  const roleLabel = isAdmin ? "Admin" : "Cashier";
+
+  const storeInitial = storeName.charAt(0).toUpperCase();
+  const cashierInitials = initials(fullName);
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between bg-slate-900 px-6 text-slate-100">
-      {/* Left — store name */}
-      <div className="text-lg font-bold tracking-tight text-burgundy-400">
-        {storeName}
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-700/60 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 px-6 text-slate-100 shadow-lg shadow-black/20">
+      {/* Left — store identity */}
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-burgundy-600 text-base font-bold text-white shadow-sm">
+          {storeInitial}
+        </div>
+        <div className="min-w-0 leading-tight">
+          <p className="truncate text-base font-bold tracking-tight text-white">
+            {storeName}
+          </p>
+          <p className="text-[11px] font-medium uppercase tracking-wider text-burgundy-400">
+            Point of Sale
+          </p>
+        </div>
       </div>
 
-      {/* Center — live clock */}
-      <div className="font-mono text-xl tabular-nums text-slate-200">
-        {now ? now.toLocaleTimeString([], { hour12: false }) : "--:--:--"}
+      {/* Center — live clock + date */}
+      <div className="hidden flex-col items-center leading-none sm:flex">
+        <span className="font-mono text-2xl font-semibold tabular-nums text-slate-100">
+          {now ? now.toLocaleTimeString([], { hour12: false }) : "--:--:--"}
+        </span>
+        <span className="mt-1 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+          {now
+            ? now.toLocaleDateString([], {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+              })
+            : ""}
+        </span>
       </div>
 
-      {/* Right — cashier + role + end shift */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
-            {cashierName(currentUser)}
-          </span>
-          {roleName && (
-            <span className="rounded-full bg-slate-700 px-2 py-0.5 text-xs font-medium text-slate-300">
-              {roleName}
+      {/* Right — cashier identity + end shift */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-slate-100 ring-2 ring-slate-600">
+            {cashierInitials}
+          </div>
+          <div className="hidden text-right leading-tight md:block">
+            <p className="max-w-[160px] truncate text-sm font-semibold text-white">
+              {fullName}
+            </p>
+            <span
+              className={
+                isAdmin
+                  ? "text-[11px] font-semibold uppercase tracking-wider text-burgundy-400"
+                  : "text-[11px] font-semibold uppercase tracking-wider text-emerald-400"
+              }
+            >
+              {roleLabel}
             </span>
-          )}
+          </div>
         </div>
         <Button
           variant="outline"
@@ -65,4 +105,14 @@ export function TerminalHeader({ session }: { session: Doc<"sessions"> }) {
       />
     </header>
   );
+}
+
+/** Up to two uppercase initials from a display name (falls back to "?"). */
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.charAt(0).toUpperCase();
+  return (
+    parts[0]!.charAt(0) + parts[parts.length - 1]!.charAt(0)
+  ).toUpperCase();
 }

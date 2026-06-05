@@ -63,14 +63,14 @@ export default function TerminalPage() {
         </div>
       </div>
 
-      {/* Mobile floating "View Cart" button (only while browsing products) */}
+      {/* Mobile floating cart button (bottom-right, only while browsing) */}
       {view === "products" && (
         <button
           type="button"
           onClick={() => setView("cart")}
-          className="fixed bottom-5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-full bg-burgundy-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-black/30 md:hidden"
+          className="fixed bottom-5 right-5 z-30 flex min-h-[52px] items-center gap-3 rounded-full bg-burgundy-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-black/30 active:scale-95 md:hidden"
         >
-          <span>View Cart ({item_count})</span>
+          <span>Cart ({item_count})</span>
           {item_count > 0 && (
             <span className="tabular-nums">{money(grand_total, currency)}</span>
           )}

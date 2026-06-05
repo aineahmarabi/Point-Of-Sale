@@ -57,12 +57,9 @@ export default function StaffPage() {
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-between px-8 py-4">
-        <div>
-          <h1 className="text-xl font-semibold">Staff</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage who can access the POS and admin.
-          </p>
-        </div>
+        <p className="text-muted-foreground text-sm">
+          Manage who can access the POS and admin.
+        </p>
         <Button onClick={() => setInviteOpen(true)}>Invite Staff</Button>
       </div>
       <DataTable
