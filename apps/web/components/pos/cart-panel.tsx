@@ -10,7 +10,6 @@ import { money, cashierName } from "@/lib/format";
 import { DiscountModal } from "./discount-modal";
 import { CustomerModal } from "./customer-modal";
 import { PaymentModal } from "./payment-modal";
-import { CloseSessionModal } from "./close-session-modal";
 
 interface CartPanelProps {
   session: Doc<"sessions">;
@@ -50,7 +49,6 @@ export function CartPanel({
   const [discountOpen, setDiscountOpen] = useState(false);
   const [customerOpen, setCustomerOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [closeOpen, setCloseOpen] = useState(false);
   const [now, setNow] = useState<number>(() => Date.now());
 
   useEffect(() => {
@@ -73,13 +71,6 @@ export function CartPanel({
               {item_count}
             </span>
           </h2>
-          <Button
-            variant="outline"
-            className="h-8 border-red-500/60 bg-transparent px-3 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300"
-            onClick={() => setCloseOpen(true)}
-          >
-            End Shift
-          </Button>
         </div>
         <p className="mt-1 text-xs text-slate-400">
           {cashierName(currentUser)} ·{" "}
@@ -261,11 +252,6 @@ export function CartPanel({
         onClose={() => setPaymentOpen(false)}
         session={session}
         currency={currency}
-      />
-      <CloseSessionModal
-        open={closeOpen}
-        onClose={() => setCloseOpen(false)}
-        session={session}
       />
     </div>
   );
