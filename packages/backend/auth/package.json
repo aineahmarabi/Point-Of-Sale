@@ -1,0 +1,23 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./providers": "./src/providers.ts",
+    "./hooks": "./src/hooks.ts",
+    "./server": "./src/server.ts"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.12.0",
+    "@repo/backend": "workspace:*",
+    "@repo/lib": "workspace:*",
+    "convex": "^1.21.0"
+  },
+  "devDependencies": {
+    "@repo/typescript": "workspace:*",
+    "@types/react": "19.2.2",
+    "next": "16.1.5",
+    "react": "^19.2.0",
+    "typescript": "5.9.2"
+  }
+}

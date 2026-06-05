@@ -1,0 +1,51 @@
+import { NextResponse } from "next/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+
+/**
+ * POST /api/staff/invite  { email, role }
+ * Creates a Clerk invitation carrying the role in public_metadata. When the
+ * invitee signs up, the Convex Clerk webhook reads that metadata and assigns
+ * the matching role — so role assignment happens automatically on acceptance.
+ */
+export async function POST(req: Request) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: { email?: string; role?: string };
+  try {
+    body = (await req.json()) as { email?: string; role?: string };
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const email = body.email?.trim();
+  const role = body.role?.trim();
+  if (!email || !role) {
+    return NextResponse.json(
+      { error: "Both email and role are required." },
+      { status: 400 },
+    );
+  }
+
+  const isAdmin = role.toLowerCase().includes("admin");
+
+  try {
+    const client = await clerkClient();
+    const invitation = await client.invitations.createInvitation({
+      emailAddress: email,
+      publicMetadata: {
+        role,
+        app: isAdmin ? ["web", "admin"] : ["web"],
+        status: "active",
+      },
+      ignoreExisting: true,
+    });
+    return NextResponse.json({ success: true, invitationId: invitation.id });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to send invitation.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

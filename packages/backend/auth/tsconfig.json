@@ -1,0 +1,7 @@
+{
+  "extends": "@repo/typescript/react-library.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src"]
+}
