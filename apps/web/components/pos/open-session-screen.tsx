@@ -5,8 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
+import { useClerk } from "@clerk/nextjs";
 import { api } from "@repo/backend";
 import { useData } from "@repo/auth/hooks";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
@@ -25,6 +28,7 @@ function greeting(d: Date | null): string {
 export function OpenSessionScreen() {
   const router = useRouter();
   const { currentUser } = useData();
+  const { signOut } = useClerk();
   const settings = useQuery(api.settings.storeSettings.current);
   const createSession = useMutation(api.pos.sessions.create);
 
@@ -74,7 +78,16 @@ export function OpenSessionScreen() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900 p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-slate-900 p-4">
+      <button
+        type="button"
+        onClick={() => void signOut({ redirectUrl: "/sign-in" })}
+        className="absolute left-4 top-4 flex items-center gap-1.5 text-sm text-slate-400 transition hover:text-white"
+      >
+        <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
+        Sign out
+      </button>
+
       <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-800 p-8 text-slate-100 shadow-2xl">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-burgundy-400">
