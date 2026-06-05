@@ -73,23 +73,10 @@ export const ensureRoles = mutation({
         permissions: ["*"],
       },
       {
-        name: "Manager",
-        app: "admin",
-        description:
-          "Cashier abilities plus voids, inventory, discounts and reporting",
-        permissions: managerPermissions,
-      },
-      {
         name: "Cashier",
         app: "admin",
         description: "Operates the POS: sells, returns, opens/closes shifts",
         permissions: cashierPermissions,
-      },
-      {
-        name: "Customer",
-        app: "web",
-        description: "Default role assigned to new users",
-        permissions: [],
       },
     ];
 
@@ -112,6 +99,50 @@ export const ensureRoles = mutation({
       created,
       skipped,
       message: `Roles ensured. Created: [${created.join(", ") || "none"}]. Already existed: [${skipped.join(", ") || "none"}].`,
+    };
+  },
+});
+
+/**
+ * Remove the unused Manager and Customer roles. Only deletes a role when no
+ * user is assigned to it, so it can never orphan an account. Idempotent.
+ *
+ *   npx convex run seed:removeUnusedRoles
+ */
+export const removeUnusedRoles = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const targets = ["Manager", "Customer"];
+    const removed: string[] = [];
+    const skippedInUse: string[] = [];
+    const notFound: string[] = [];
+
+    for (const roleName of targets) {
+      const role = await ctx.db
+        .query("roles")
+        .withIndex("by_name", (q) => q.eq("name", roleName))
+        .first();
+      if (!role) {
+        notFound.push(roleName);
+        continue;
+      }
+      const assigned = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("role"), role._id))
+        .first();
+      if (assigned) {
+        skippedInUse.push(roleName);
+        continue;
+      }
+      await ctx.db.delete(role._id);
+      removed.push(roleName);
+    }
+
+    return {
+      removed,
+      skippedInUse,
+      notFound,
+      message: `Removed: [${removed.join(", ") || "none"}]. Still in use (kept): [${skippedInUse.join(", ") || "none"}]. Not found: [${notFound.join(", ") || "none"}].`,
     };
   },
 });
