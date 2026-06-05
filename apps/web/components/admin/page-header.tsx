@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useQuery } from "convex/react";
-import { api } from "@repo/backend";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 
@@ -10,9 +8,9 @@ import { CommandPalette } from "./command-palette";
 
 /**
  * Sticky page header shown on every admin page. Page title on the left,
- * the store name as a burgundy pill on the right. The store name is fetched
- * from Convex (falls back to "My Store"). Pass `actions` for page-specific
- * controls (e.g. a "New" button) and `leading` for the mobile menu button.
+ * search + page-specific actions on the right. The store name lives in the
+ * sidebar, so it is intentionally not repeated here. Pass `actions` for
+ * page-specific controls and `leading` for the mobile menu button.
  */
 export function PageHeader({
   title,
@@ -25,8 +23,6 @@ export function PageHeader({
   actions?: ReactNode;
   leading?: ReactNode;
 }) {
-  const settings = useQuery(api.settings.storeSettings.current);
-  const storeName = settings?.store_name ?? "My Store";
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   // Global Ctrl/Cmd+K opens the command palette.
@@ -76,12 +72,6 @@ export function PageHeader({
           </button>
 
           {actions}
-          <span
-            className="hidden items-center rounded-full bg-burgundy-600 px-3 py-1 text-sm font-semibold text-white shadow-sm sm:inline-flex"
-            title={storeName}
-          >
-            {storeName}
-          </span>
         </div>
       </header>
 

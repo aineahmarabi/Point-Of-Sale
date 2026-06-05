@@ -21,7 +21,10 @@ import {
 } from "@repo/ui/components/ui/select";
 import { cn } from "@repo/ui/lib/utils";
 
+import { Modal } from "@/components/pos/modal";
 import { notifyError, notifySuccess } from "@/lib/errors";
+
+const NEW_CATEGORY = "__new__";
 
 type Status = (typeof productStatus)[number];
 
@@ -91,6 +94,7 @@ export function ProductFormPage({
   const removeVariant = useMutation(api.catalog.variants.remove);
   const createInventory = useMutation(api.catalog.inventory.create);
   const updateInventory = useMutation(api.catalog.inventory.update);
+  const createCategory = useMutation(api.catalog.categories.create);
 
   // ── Form state ──────────────────────────────────────────────
   const [name, setName] = useState("");
@@ -116,6 +120,10 @@ export function ProductFormPage({
   );
   const [images, setImages] = useState<string[]>([]);
   const [imageInput, setImageInput] = useState("");
+
+  const [newCatOpen, setNewCatOpen] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
+  const [creatingCat, setCreatingCat] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -202,6 +210,27 @@ export function ProductFormPage({
 
   const categories = categoriesResult?.page ?? [];
   const taxRates = taxRatesResult?.page ?? [];
+
+  async function handleCreateCategory(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    setCreatingCat(true);
+    try {
+      const id = await createCategory({
+        name: newCatName.trim(),
+        status: "active",
+        display_order: 0,
+      });
+      setCategoryId(id);
+      setNewCatName("");
+      setNewCatOpen(false);
+      notifySuccess("Category created.");
+    } catch (err) {
+      notifyError(err);
+    } finally {
+      setCreatingCat(false);
+    }
+  }
 
   function addImage() {
     const url = imageInput.trim();
@@ -300,18 +329,27 @@ export function ProductFormPage({
     setSubmitting(true);
     setError(null);
     try {
+      // Optional ID/number fields: only send a real value, otherwise undefined
+      // (never "" — that fails the v.id / v.float64 validators).
+      const realCategory =
+        categoryId && categoryId !== "none"
+          ? (categoryId as Id<"categories">)
+          : undefined;
+      const taxNum = Number(taxRate);
+      const realTax =
+        taxRate && taxRate !== "none" && !Number.isNaN(taxNum)
+          ? taxNum
+          : undefined;
+
       const payload = {
         name: name.trim(),
         description: description.trim() || undefined,
         sku: sku.trim() || undefined,
         barcode: barcode.trim() || undefined,
-        category_id:
-          categoryId !== "none"
-            ? (categoryId as Id<"categories">)
-            : undefined,
+        category_id: realCategory,
         cost_price: costNum,
         selling_price: sellingNum,
-        tax_rate: taxRate !== "none" ? Number(taxRate) : undefined,
+        tax_rate: realTax,
         status,
         is_service: !trackInventory,
         images,
@@ -422,7 +460,7 @@ export function ProductFormPage({
   }
 
   return (
-    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+    <main className="max-w-full flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8">
       <form onSubmit={handleSubmit} className="mx-auto max-w-3xl space-y-6 pb-24">
         {/* Title bar */}
         <div className="flex items-center justify-between gap-3">
@@ -476,7 +514,16 @@ export function ProductFormPage({
           </Field>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Category">
-              <Select value={categoryId} onValueChange={setCategoryId}>
+              <Select
+                value={categoryId}
+                onValueChange={(v) => {
+                  if (v === NEW_CATEGORY) {
+                    setNewCatOpen(true);
+                    return;
+                  }
+                  setCategoryId(v);
+                }}
+              >
                 <SelectTrigger className="min-h-[44px]">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -487,6 +534,12 @@ export function ProductFormPage({
                       {c.name}
                     </SelectItem>
                   ))}
+                  <SelectItem
+                    value={NEW_CATEGORY}
+                    className="font-medium text-burgundy-600"
+                  >
+                    + New category
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </Field>
@@ -821,6 +874,44 @@ export function ProductFormPage({
           )}
         </Section>
       </form>
+
+      {/* Inline "new category" modal */}
+      <Modal open={newCatOpen} onClose={() => setNewCatOpen(false)}>
+        <form onSubmit={handleCreateCategory} className="space-y-4 p-6">
+          <h2 className="text-lg font-semibold text-slate-900">New category</h2>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-cat-name" className="text-sm text-slate-700">
+              Category name<span className="ml-0.5 text-red-500">*</span>
+            </Label>
+            <Input
+              id="new-cat-name"
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+              placeholder="e.g. Apparel"
+              autoFocus
+              className="min-h-[44px]"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-[44px] flex-1"
+              onClick={() => setNewCatOpen(false)}
+              disabled={creatingCat}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="min-h-[44px] flex-1 bg-burgundy-600 hover:bg-burgundy-700"
+              disabled={creatingCat || !newCatName.trim()}
+            >
+              {creatingCat ? "Saving…" : "Save"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </main>
   );
 }

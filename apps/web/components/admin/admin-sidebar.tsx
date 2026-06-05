@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useConvex, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { useClerk } from "@clerk/nextjs";
 import { api } from "@repo/backend";
@@ -122,6 +122,46 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
+/** Polls the Convex websocket connection so we can show Live / Offline. */
+function useConnectionLive(): boolean {
+  const convex = useConvex();
+  const [live, setLive] = useState(true);
+  useEffect(() => {
+    const check = () => {
+      try {
+        setLive(convex.connectionState().isWebSocketConnected);
+      } catch {
+        setLive(false);
+      }
+    };
+    check();
+    const t = setInterval(check, 2000);
+    return () => clearInterval(t);
+  }, [convex]);
+  return live;
+}
+
+function LiveBadge({ live }: { live: boolean }) {
+  return (
+    <span className="mt-0.5 flex items-center gap-1.5">
+      <span
+        className={cn(
+          "h-2 w-2 rounded-full",
+          live ? "animate-pulse bg-green-500" : "bg-red-500",
+        )}
+      />
+      <span
+        className={cn(
+          "text-[10px] font-semibold uppercase tracking-wide",
+          live ? "text-green-400" : "text-red-400",
+        )}
+      >
+        {live ? "Live" : "Offline"}
+      </span>
+    </span>
+  );
+}
+
 export function AdminSidebar({
   open,
   onClose,
@@ -133,6 +173,7 @@ export function AdminSidebar({
 }) {
   const pathname = usePathname();
   const { signOut } = useClerk();
+  const live = useConnectionLive();
   const settings = useQuery(api.settings.storeSettings.current);
   const storeName = settings?.store_name ?? "POS";
   const roleName = user.role?.name ?? "Staff";
@@ -177,10 +218,13 @@ export function AdminSidebar({
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between px-5 py-4">
-          <span className="text-lg font-bold tracking-tight text-burgundy-400">
-            {storeName}
-          </span>
+        <div className="flex items-start justify-between gap-2 px-5 py-4">
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-lg font-bold tracking-tight text-burgundy-400">
+              {storeName}
+            </span>
+            <LiveBadge live={live} />
+          </div>
           <button
             type="button"
             onClick={onClose}

@@ -28,6 +28,17 @@
   --ring: #b03a52;
 }
 
+/* ── Remove number-input spinner arrows everywhere ───────────── */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 /* ── Animations (cashier polish) ─────────────────────────────── */
 @keyframes shimmer {
   0% {
