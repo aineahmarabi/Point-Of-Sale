@@ -15,6 +15,7 @@ import type * as catalog_inventoryAdjustments from "../catalog/inventoryAdjustme
 import type * as catalog_products from "../catalog/products.js";
 import type * as catalog_variants from "../catalog/variants.js";
 import type * as crm_customers from "../crm/customers.js";
+import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as pos_cashMovements from "../pos/cashMovements.js";
 import type * as pos_orderItems from "../pos/orderItems.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   "catalog/products": typeof catalog_products;
   "catalog/variants": typeof catalog_variants;
   "crm/customers": typeof crm_customers;
+  files: typeof files;
   http: typeof http;
   "pos/cashMovements": typeof pos_cashMovements;
   "pos/orderItems": typeof pos_orderItems;

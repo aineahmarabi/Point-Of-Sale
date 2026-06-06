@@ -22,6 +22,7 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 
 import { Modal } from "@/components/pos/modal";
+import { ImageUploader } from "@/components/admin/image-uploader";
 import { notifyError, notifySuccess } from "@/lib/errors";
 
 const NEW_CATEGORY = "__new__";
@@ -119,7 +120,6 @@ export function ProductFormPage({
     [],
   );
   const [images, setImages] = useState<string[]>([]);
-  const [imageInput, setImageInput] = useState("");
 
   const [newCatOpen, setNewCatOpen] = useState(false);
   const [newCatName, setNewCatName] = useState("");
@@ -230,13 +230,6 @@ export function ProductFormPage({
     } finally {
       setCreatingCat(false);
     }
-  }
-
-  function addImage() {
-    const url = imageInput.trim();
-    if (!url) return;
-    setImages((prev) => [...prev, url]);
-    setImageInput("");
   }
 
   function removeImage(idx: number) {
@@ -825,27 +818,14 @@ export function ProductFormPage({
 
         {/* SECTION 5 — Images */}
         <Section title="Images">
-          <div className="flex gap-2">
-            <Input
-              value={imageInput}
-              onChange={(e) => setImageInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addImage();
-                }
-              }}
-              placeholder="https://image-url.jpg"
-              className="min-h-[44px]"
+          <div className="flex items-center gap-3">
+            <ImageUploader
+              label="Upload image"
+              onUploaded={(url) => setImages((prev) => [...prev, url])}
             />
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-[44px] shrink-0"
-              onClick={addImage}
-            >
-              Add
-            </Button>
+            <p className="text-xs text-slate-500">
+              PNG or JPG. Upload as many as you like.
+            </p>
           </div>
           {images.length > 0 && (
             <div className="flex flex-wrap gap-3">

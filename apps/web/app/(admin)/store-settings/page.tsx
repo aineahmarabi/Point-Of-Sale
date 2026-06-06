@@ -28,6 +28,7 @@ import {
 } from "@repo/ui/components/ui/select";
 
 import { PermissionGuard } from "@/components/admin/module/permission-guard";
+import { ImageUploader } from "@/components/admin/image-uploader";
 import { notifyError, notifySuccess } from "@/lib/errors";
 
 const CURRENCIES = [
@@ -284,10 +285,39 @@ export default function StoreSettings() {
               name="logo_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Logo URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="https://..." />
-                  </FormControl>
+                  <FormLabel>Store Logo</FormLabel>
+                  <div className="flex items-center gap-4">
+                    {field.value ? (
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={field.value}
+                          alt="Logo"
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-dashed border-slate-300 text-xs text-slate-400">
+                        No logo
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <ImageUploader
+                        label={field.value ? "Replace logo" : "Upload logo"}
+                        onUploaded={(url) => field.onChange(url)}
+                      />
+                      {field.value ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => field.onChange("")}
+                        >
+                          Remove
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
