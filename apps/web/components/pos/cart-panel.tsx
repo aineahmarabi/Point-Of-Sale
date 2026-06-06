@@ -5,7 +5,7 @@ import { useData } from "@repo/auth/hooks";
 import { Button } from "@repo/ui/components/ui/button";
 
 import { useCart } from "@/context/cart-context";
-import { formatCurrency, cashierName } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { DiscountModal } from "./discount-modal";
 import { CustomerModal } from "./customer-modal";
 import { PaymentModal } from "./payment-modal";
@@ -52,7 +52,9 @@ export function CartPanel({ currency, requireCustomer }: CartPanelProps) {
           </h2>
         </div>
         <p className="mt-1 text-xs text-slate-400">
-          {cashierName(currentUser)}
+          {currentUser?.name
+            ? `${currentUser.name.first} ${currentUser.name.last}`.trim()
+            : (currentUser?.email ?? "—")}
         </p>
       </div>
 

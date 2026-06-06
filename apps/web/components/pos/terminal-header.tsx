@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useQuery } from "convex/react";
+import { useClerk } from "@clerk/nextjs";
 import { api } from "@repo/backend";
 import { useData } from "@repo/auth/hooks";
+import { Button } from "@repo/ui/components/ui/button";
 
 import { cashierName } from "@/lib/format";
 
-/** Terminal top bar — no session or End Shift; the session system is hidden. */
+/** Terminal top bar — clock, cashier identity, and exit action. */
 export function TerminalHeader() {
   const { currentUser } = useData();
+  const { signOut } = useClerk();
   const settings = useQuery(api.settings.storeSettings.current);
   const [now, setNow] = useState<Date | null>(null);
 
@@ -64,7 +68,7 @@ export function TerminalHeader() {
         </span>
       </div>
 
-      {/* Right — cashier identity */}
+      {/* Right — cashier identity + exit action */}
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-slate-100 ring-2 ring-slate-600">
           {cashierInitials}
@@ -83,6 +87,25 @@ export function TerminalHeader() {
             {roleLabel}
           </span>
         </div>
+
+        {/* Exit: admins go to dashboard, cashiers sign out */}
+        {isAdmin ? (
+          <Button
+            asChild
+            variant="outline"
+            className="h-9 border-burgundy-500/60 bg-transparent px-3 text-xs text-burgundy-300 hover:bg-burgundy-500/10 hover:text-burgundy-200"
+          >
+            <Link href="/dashboard">Dashboard</Link>
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            className="h-9 border-slate-600 bg-transparent px-3 text-xs text-slate-400 hover:bg-slate-700 hover:text-white"
+            onClick={() => void signOut({ redirectUrl: "/sign-in" })}
+          >
+            Sign out
+          </Button>
+        )}
       </div>
     </header>
   );
