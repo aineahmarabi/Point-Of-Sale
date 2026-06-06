@@ -40,11 +40,7 @@ export function Receipt({ data, onNewSale }: ReceiptProps) {
   return (
     <div className="fixed inset-0 z-[60] overflow-y-auto bg-white">
       <div className="mx-auto max-w-sm px-6 py-8">
-        {/* receipt-printable: only this section is visible during window.print() */}
-        <div
-          id="pos-receipt"
-          className="receipt-printable font-mono text-sm text-zinc-900"
-        >
+        <div id="receipt-print-area" className="font-mono text-sm text-zinc-900">
           {/* Header */}
           <div className="text-center">
             <p className="text-base font-bold">
@@ -175,16 +171,14 @@ export function Receipt({ data, onNewSale }: ReceiptProps) {
           </p>
         </div>
 
-        {/* Actions (hidden when printing) */}
-        <div className="mt-8 flex gap-3 print:hidden">
-          <Button
-            variant="outline"
-            className="h-12 flex-1"
+        <div className="no-print flex gap-3 mt-6 justify-center">
+          <button
+            className="border-2 border-slate-300 text-slate-700 bg-white font-semibold px-6 py-2 rounded-lg hover:bg-slate-50"
             onClick={() => window.print()}
           >
             Print
-          </Button>
-          <Button className="h-12 flex-1" onClick={onNewSale}>
+          </button>
+          <Button className="h-10 px-6" onClick={onNewSale}>
             New Sale
           </Button>
         </div>
