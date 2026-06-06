@@ -1,6 +1,24 @@
-export function money(amount: number, currency = "KES"): string {
+/** Format a currency amount with comma thousands-separator. */
+export function formatCurrency(amount: number, currency = "KES"): string {
   const value = Number.isFinite(amount) ? amount : 0;
-  return `${currency} ${value.toFixed(2)}`;
+  return `${currency} ${value.toLocaleString("en-KE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+/** Format a number with comma thousands-separator (no currency prefix). */
+export function formatNumber(amount: number): string {
+  const value = Number.isFinite(amount) ? amount : 0;
+  return value.toLocaleString("en-KE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/** @deprecated Use formatCurrency instead. Kept for compatibility. */
+export function money(amount: number, currency = "KES"): string {
+  return formatCurrency(amount, currency);
 }
 
 /** Capitalise the first letter of each word, lower-casing the rest. */

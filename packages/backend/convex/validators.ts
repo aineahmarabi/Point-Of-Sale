@@ -205,7 +205,7 @@ export const sessions = {
 
 export const orders = {
   order_number: v.string(),
-  session_id: v.id("sessions"),
+  session_id: v.optional(v.id("sessions")),
   cashier_id: v.id("users"),
   customer_id: v.optional(v.id("customers")),
   status: v.union(...orderStatus.map((e) => v.literal(e))),

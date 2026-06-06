@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from "recharts";
 
-import { money } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { cn } from "@repo/ui/lib/utils";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -73,7 +73,7 @@ export default function DashboardPage() {
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Total Sales Today"
-          value={stats ? money(stats.totalSales, currency) : "—"}
+          value={stats ? formatCurrency(stats.totalSales, currency) : "—"}
           accent="text-burgundy-600"
         />
         <StatCard
@@ -139,7 +139,7 @@ export default function DashboardPage() {
                   }
                 />
                 <Tooltip
-                  formatter={(value) => money(Number(value), currency)}
+                  formatter={(value) => formatCurrency(Number(value), currency)}
                   contentStyle={{ fontSize: 12, borderRadius: 8 }}
                 />
                 <Area
@@ -200,7 +200,7 @@ export default function DashboardPage() {
                     <td className="px-5 py-2.5">{o.cashier_name}</td>
                     <td className="px-5 py-2.5 tabular-nums">{o.item_count}</td>
                     <td className="px-5 py-2.5 tabular-nums">
-                      {money(o.grand_total, currency)}
+                      {formatCurrency(o.grand_total, currency)}
                     </td>
                     <td className="px-5 py-2.5 text-slate-500">
                       {new Date(o.completed_at).toLocaleString([], {

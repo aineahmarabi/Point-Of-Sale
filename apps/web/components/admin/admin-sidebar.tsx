@@ -15,7 +15,6 @@ import {
   UngroupItemsIcon,
   UserEdit01Icon,
   Setting07Icon,
-  ShoppingCart01Icon,
 } from "@hugeicons/core-free-icons";
 import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/components/ui/button";
@@ -67,10 +66,7 @@ const NAV: NavGroup[] = [
   },
   {
     title: "Reports",
-    links: [
-      { label: "Orders", href: "/orders", icon: Package01Icon },
-      { label: "Sessions", href: "/sessions", icon: DashboardCircleIcon },
-    ],
+    links: [{ label: "Orders", href: "/orders", icon: Package01Icon }],
   },
   {
     title: "Settings",
@@ -237,16 +233,6 @@ export function AdminSidebar({
         </div>
 
         <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-2">
-          {/* Switch to cashier mode — prominent, above all nav groups */}
-          <Link
-            href="/terminal"
-            onClick={onClose}
-            className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-burgundy-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-burgundy-700"
-          >
-            <HugeiconsIcon icon={ShoppingCart01Icon} size={18} />
-            Open POS Terminal
-          </Link>
-
           {/* Overview — always visible, not collapsible */}
           {overview?.links.map((link) => {
             const active = isLinkActive(pathname, link.href);

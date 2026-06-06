@@ -8,24 +8,13 @@ import { cn } from "@repo/ui/lib/utils";
 import { ProductGrid } from "@/components/pos/product-grid";
 import { CartPanel } from "@/components/pos/cart-panel";
 import { useCart } from "@/context/cart-context";
-import { money } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 
 export default function TerminalPage() {
-  const session = useQuery(api.pos.sessions.getOpenByUser);
   const settings = useQuery(api.settings.storeSettings.current);
   const currency = settings?.currency ?? "KES";
   const { item_count, grand_total } = useCart();
   const [view, setView] = useState<"products" | "cart">("products");
-
-  // The (pos) layout guarantees an open session before rendering this route,
-  // but guard while the query settles.
-  if (!session) {
-    return (
-      <div className="flex h-full items-center justify-center bg-slate-900 text-slate-400">
-        <p className="text-sm">Loading terminal…</p>
-      </div>
-    );
-  }
 
   return (
     <div className="relative flex h-full bg-slate-900">
@@ -56,7 +45,6 @@ export default function TerminalPage() {
         </button>
         <div className="min-h-0 flex-1">
           <CartPanel
-            session={session}
             currency={currency}
             requireCustomer={settings?.require_customer_on_sale ?? false}
           />
@@ -72,7 +60,9 @@ export default function TerminalPage() {
         >
           <span>Cart ({item_count})</span>
           {item_count > 0 && (
-            <span className="tabular-nums">{money(grand_total, currency)}</span>
+            <span className="tabular-nums">
+              {formatCurrency(grand_total, currency)}
+            </span>
           )}
         </button>
       )}

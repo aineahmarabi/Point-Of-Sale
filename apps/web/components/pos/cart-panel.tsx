@@ -1,27 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import type { Doc } from "@repo/backend/dataModel";
 import { useData } from "@repo/auth/hooks";
 import { Button } from "@repo/ui/components/ui/button";
 
 import { useCart } from "@/context/cart-context";
-import { money, cashierName } from "@/lib/format";
+import { formatCurrency, cashierName } from "@/lib/format";
 import { DiscountModal } from "./discount-modal";
 import { CustomerModal } from "./customer-modal";
 import { PaymentModal } from "./payment-modal";
 
 interface CartPanelProps {
-  session: Doc<"sessions">;
   currency: string;
   requireCustomer: boolean;
 }
 
-export function CartPanel({
-  session,
-  currency,
-  requireCustomer,
-}: CartPanelProps) {
+export function CartPanel({ currency, requireCustomer }: CartPanelProps) {
   const { currentUser } = useData();
   const {
     items,
@@ -78,7 +72,7 @@ export function CartPanel({
                       {item.product_name}
                     </p>
                     <p className="text-xs text-slate-400">
-                      {money(item.unit_price, currency)}
+                      {formatCurrency(item.unit_price, currency)}
                       {item.sku ? ` · ${item.sku}` : ""}
                     </p>
                   </div>
@@ -118,7 +112,7 @@ export function CartPanel({
                     </button>
                   </div>
                   <span className="text-sm font-semibold tabular-nums text-slate-100">
-                    {money(item.line_total, currency)}
+                    {formatCurrency(item.line_total, currency)}
                   </span>
                 </div>
               </li>
@@ -167,7 +161,9 @@ export function CartPanel({
         <div className="space-y-1.5 border-t border-slate-700 pt-3 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-400">Subtotal</span>
-            <span className="tabular-nums">{money(subtotal, currency)}</span>
+            <span className="tabular-nums">
+              {formatCurrency(subtotal, currency)}
+            </span>
           </div>
           {discount && discount_total > 0 ? (
             <div className="flex justify-between text-burgundy-400">
@@ -182,18 +178,20 @@ export function CartPanel({
                 </button>
               </span>
               <span className="tabular-nums">
-                −{money(discount_total, currency)}
+                −{formatCurrency(discount_total, currency)}
               </span>
             </div>
           ) : null}
           <div className="flex justify-between">
             <span className="text-slate-400">Tax</span>
-            <span className="tabular-nums">{money(tax_total, currency)}</span>
+            <span className="tabular-nums">
+              {formatCurrency(tax_total, currency)}
+            </span>
           </div>
           <div className="flex items-baseline justify-between border-t border-slate-700 pt-2">
             <span className="text-base font-semibold">Total</span>
             <span className="text-2xl font-bold tabular-nums text-burgundy-400">
-              {money(grand_total, currency)}
+              {formatCurrency(grand_total, currency)}
             </span>
           </div>
         </div>
@@ -209,7 +207,7 @@ export function CartPanel({
           disabled={!canCharge}
           onClick={() => setPaymentOpen(true)}
         >
-          Charge {money(grand_total, currency)}
+          Charge {formatCurrency(grand_total, currency)}
         </Button>
       </div>
 
@@ -234,7 +232,6 @@ export function CartPanel({
       <PaymentModal
         open={paymentOpen}
         onClose={() => setPaymentOpen(false)}
-        session={session}
         currency={currency}
       />
     </div>

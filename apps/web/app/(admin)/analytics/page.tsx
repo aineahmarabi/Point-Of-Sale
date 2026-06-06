@@ -18,7 +18,7 @@ import {
   Bar,
 } from "recharts";
 
-import { money } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { cn } from "@repo/ui/lib/utils";
 
 type Preset = "today" | "yesterday" | "7d" | "30d" | "month" | "custom";
@@ -210,7 +210,7 @@ export default function AnalyticsPage() {
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           label="Total Sales"
-          value={stats ? money(stats.totalSales, currency) : "—"}
+          value={stats ? formatCurrency(stats.totalSales, currency) : "—"}
           change={salesChange}
           accent="text-burgundy-600"
         />
@@ -262,7 +262,7 @@ export default function AnalyticsPage() {
                     }
                   />
                   <Tooltip
-                    formatter={(value) => money(Number(value), currency)}
+                    formatter={(value) => formatCurrency(Number(value), currency)}
                     labelStyle={{ fontSize: 12 }}
                     contentStyle={{ fontSize: 12, borderRadius: 8 }}
                   />
@@ -306,7 +306,7 @@ export default function AnalyticsPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value) => money(Number(value), currency)}
+                    formatter={(value) => formatCurrency(Number(value), currency)}
                     contentStyle={{ fontSize: 12, borderRadius: 8 }}
                   />
                 </PieChart>
@@ -336,7 +336,7 @@ export default function AnalyticsPage() {
                     </span>
                   </span>
                   <span className="tabular-nums text-slate-600">
-                    {money(d.value, currency)}
+                    {formatCurrency(d.value, currency)}
                   </span>
                 </li>
               ))}
@@ -440,7 +440,7 @@ export default function AnalyticsPage() {
                         {o.item_count}
                       </td>
                       <td className="px-5 py-2.5 tabular-nums">
-                        {money(o.grand_total, currency)}
+                        {formatCurrency(o.grand_total, currency)}
                       </td>
                       <td className="px-5 py-2.5 capitalize">
                         {o.payment_method}

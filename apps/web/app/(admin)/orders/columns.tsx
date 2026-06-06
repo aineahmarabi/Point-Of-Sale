@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { Doc } from "@repo/backend/dataModel";
 
 import { ActionsCell } from "@/components/admin/module/actions-cell";
+import { formatCurrency } from "@/lib/format";
 
 type Order = Doc<"orders"> & {
   cashier_name?: string | null;
@@ -44,7 +45,10 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Order>[] {
     {
       accessorKey: "grand_total",
       header: "Total",
-      cell: ({ row }) => row.getValue<number>("grand_total")?.toFixed(2) ?? "—",
+      cell: ({ row }) => {
+        const v = row.getValue<number | undefined>("grand_total");
+        return v != null ? formatCurrency(v) : "—";
+      },
     },
     {
       accessorKey: "payment_method",

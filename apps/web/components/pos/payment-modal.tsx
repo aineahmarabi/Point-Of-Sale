@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { api } from "@repo/backend";
-import type { Doc } from "@repo/backend/dataModel";
 import { useData } from "@repo/auth/hooks";
 import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/components/ui/button";
@@ -14,13 +13,12 @@ import { Label } from "@repo/ui/components/ui/label";
 import { Modal } from "./modal";
 import { Receipt, type ReceiptData } from "./receipt";
 import { useCart } from "@/context/cart-context";
-import { money, cashierName } from "@/lib/format";
+import { formatCurrency, cashierName } from "@/lib/format";
 import { notifyError } from "@/lib/errors";
 
 interface PaymentModalProps {
   open: boolean;
   onClose: () => void;
-  session: Doc<"sessions">;
   currency: string;
 }
 
@@ -33,12 +31,7 @@ function genInternalRef(): string {
     .padStart(4, "0")}`;
 }
 
-export function PaymentModal({
-  open,
-  onClose,
-  session,
-  currency,
-}: PaymentModalProps) {
+export function PaymentModal({ open, onClose, currency }: PaymentModalProps) {
   const { currentUser } = useData();
   const {
     items,
@@ -108,7 +101,6 @@ export function PaymentModal({
 
       const orderId = await createOrder({
         order_number: number,
-        session_id: session._id,
         cashier_id: currentUser._id,
         ...(customer ? { customer_id: customer._id } : {}),
         status: "completed",
@@ -267,7 +259,7 @@ export function PaymentModal({
               Total Due
             </p>
             <p className="mt-1 text-4xl font-bold tabular-nums text-white">
-              {money(grand_total, currency)}
+              {formatCurrency(grand_total, currency)}
             </p>
           </div>
 
@@ -321,7 +313,7 @@ export function PaymentModal({
                     Change Due
                   </span>
                   <span className="text-2xl font-bold tabular-nums text-emerald-400">
-                    {money(change, currency)}
+                    {formatCurrency(change, currency)}
                   </span>
                 </div>
               )}
@@ -384,7 +376,7 @@ export function PaymentModal({
                   M-Pesa Amount
                 </span>
                 <span className="text-lg font-bold tabular-nums text-white">
-                  {money(splitMpesaAmount, currency)}
+                  {formatCurrency(splitMpesaAmount, currency)}
                 </span>
               </div>
               <div className="space-y-1.5">
@@ -418,7 +410,7 @@ export function PaymentModal({
             >
               {phase === "processing"
                 ? "Processing…"
-                : `Confirm · ${money(grand_total, currency)}`}
+                : `Confirm · ${formatCurrency(grand_total, currency)}`}
             </Button>
             <Button
               variant="ghost"

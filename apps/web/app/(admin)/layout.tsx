@@ -24,7 +24,6 @@ const PAGE_TITLES: Record<string, string> = {
   customers: "Customers",
   discounts: "Discounts",
   orders: "Orders",
-  sessions: "Sessions",
   "tax-rates": "Tax Rates",
   "store-settings": "Store Settings",
   staff: "Staff",

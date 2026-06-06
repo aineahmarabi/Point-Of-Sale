@@ -5,6 +5,7 @@ import type { Doc } from "@repo/backend/dataModel";
 
 import { ActionsCell } from "@/components/admin/module/actions-cell";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { formatNumber } from "@/lib/format";
 
 type Product = Doc<"products"> & { category_name?: string | null };
 
@@ -30,8 +31,8 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Product>[] {
       accessorKey: "selling_price",
       header: "Price",
       cell: ({ row }) => {
-        const price = row.getValue<number>("selling_price");
-        return price?.toFixed(2) ?? "—";
+        const price = row.getValue<number | undefined>("selling_price");
+        return price != null ? formatNumber(price) : "—";
       },
     },
     {

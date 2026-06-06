@@ -1,8 +1,7 @@
 "use client";
 
-import { Component, useEffect, type ReactNode } from "react";
+import { Component, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
 import { useClerk } from "@clerk/nextjs";
@@ -64,8 +63,6 @@ function FullScreenError({
   );
 }
 
-/** Catches render-time errors (e.g. the currentUser query throwing when the
- *  signed-in user has no row in the `users` table) so the screen is never blank. */
 class PosErrorBoundary extends Component<
   { children: ReactNode },
   { error: Error | null }
@@ -95,8 +92,7 @@ class PosErrorBoundary extends Component<
   }
 }
 
-/** Resolves the current staff user before mounting the data provider, with
- *  explicit loading / unauthenticated states instead of a blank screen. */
+/** Resolves the current staff user, shows friendly errors, then renders. */
 function CurrentUserGate({ children }: { children: ReactNode }) {
   const currentUser = useQuery(api.user.users.currentUser);
 
@@ -112,8 +108,6 @@ function CurrentUserGate({ children }: { children: ReactNode }) {
     );
   }
 
-  // Terminal access: any ACTIVE staff member with ANY role assigned.
-  // Role-name agnostic — "Super Admin", "Admin", "Manager", "Cashier", etc. all pass.
   if (!isActiveStaff(currentUser)) {
     const detail =
       currentUser.status !== "active"
@@ -124,39 +118,14 @@ function CurrentUserGate({ children }: { children: ReactNode }) {
 
   return (
     <DataProvider>
-      <PosGate>{children}</PosGate>
+      <PosShell>{children}</PosShell>
     </DataProvider>
   );
 }
 
-function PosGate({ children }: { children: ReactNode }) {
+/** Wraps the POS terminal — no session gate, goes straight in. */
+function PosShell({ children }: { children: ReactNode }) {
   const { currentUser } = useData();
-  const session = useQuery(api.pos.sessions.getOpenByUser);
-  const pathname = usePathname();
-  const router = useRouter();
-  const onOpenSessionRoute = pathname === "/open-session";
-
-  useEffect(() => {
-    if (session === undefined) return;
-    if (session === null && !onOpenSessionRoute) {
-      router.replace("/open-session");
-    } else if (session && onOpenSessionRoute) {
-      router.replace("/terminal");
-    }
-  }, [session, onOpenSessionRoute, router]);
-
-  // Loading the open-session lookup.
-  if (session === undefined) {
-    return <FullScreenLoader label="Opening terminal…" />;
-  }
-
-  // No open shift → only the open-session screen may render.
-  if (session === null) {
-    return onOpenSessionRoute ? <>{children}</> : <FullScreenLoader />;
-  }
-
-  // Open shift exists. While the open-session route redirects away, show loader.
-  if (onOpenSessionRoute) return <FullScreenLoader />;
 
   return (
     <CartProvider>
@@ -173,7 +142,7 @@ function PosGate({ children }: { children: ReactNode }) {
             </span>
           </Link>
         )}
-        <TerminalHeader session={session} />
+        <TerminalHeader />
         <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
       </div>
     </CartProvider>

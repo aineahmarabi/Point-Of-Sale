@@ -37,7 +37,6 @@ const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Customers", href: "/customers" },
   { label: "Discounts", href: "/discounts" },
   { label: "Orders", href: "/orders" },
-  { label: "Sessions", href: "/sessions" },
   { label: "Tax Rates", href: "/tax-rates" },
   { label: "Store Settings", href: "/store-settings" },
   { label: "Staff", href: "/staff" },

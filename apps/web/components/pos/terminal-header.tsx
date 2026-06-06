@@ -3,18 +3,15 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@repo/backend";
-import type { Doc } from "@repo/backend/dataModel";
 import { useData } from "@repo/auth/hooks";
-import { Button } from "@repo/ui/components/ui/button";
 
-import { CloseSessionModal } from "./close-session-modal";
 import { cashierName } from "@/lib/format";
 
-export function TerminalHeader({ session }: { session: Doc<"sessions"> }) {
+/** Terminal top bar — no session or End Shift; the session system is hidden. */
+export function TerminalHeader() {
   const { currentUser } = useData();
   const settings = useQuery(api.settings.storeSettings.current);
   const [now, setNow] = useState<Date | null>(null);
-  const [closeOpen, setCloseOpen] = useState(false);
 
   useEffect(() => {
     setNow(new Date());
@@ -25,7 +22,6 @@ export function TerminalHeader({ session }: { session: Doc<"sessions"> }) {
   const storeName = settings?.store_name ?? "POS Terminal";
   const fullName = cashierName(currentUser);
 
-  // Normalise the role to the two access levels cashiers understand.
   const isAdmin =
     currentUser?.role?.permissions?.includes("*") ||
     currentUser?.role?.name?.toLowerCase().includes("admin") ||
@@ -68,46 +64,30 @@ export function TerminalHeader({ session }: { session: Doc<"sessions"> }) {
         </span>
       </div>
 
-      {/* Right — cashier identity + end shift */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-slate-100 ring-2 ring-slate-600">
-            {cashierInitials}
-          </div>
-          <div className="hidden text-right leading-tight md:block">
-            <p className="max-w-[160px] truncate text-sm font-semibold text-white">
-              {fullName}
-            </p>
-            <span
-              className={
-                isAdmin
-                  ? "text-[11px] font-semibold uppercase tracking-wider text-burgundy-400"
-                  : "text-[11px] font-semibold uppercase tracking-wider text-emerald-400"
-              }
-            >
-              {roleLabel}
-            </span>
-          </div>
+      {/* Right — cashier identity */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs font-bold text-slate-100 ring-2 ring-slate-600">
+          {cashierInitials}
         </div>
-        <Button
-          variant="outline"
-          className="h-9 border-red-500/60 bg-transparent text-red-400 hover:bg-red-500/10 hover:text-red-300"
-          onClick={() => setCloseOpen(true)}
-        >
-          End Shift
-        </Button>
+        <div className="hidden text-right leading-tight md:block">
+          <p className="max-w-[160px] truncate text-sm font-semibold text-white">
+            {fullName}
+          </p>
+          <span
+            className={
+              isAdmin
+                ? "text-[11px] font-semibold uppercase tracking-wider text-burgundy-400"
+                : "text-[11px] font-semibold uppercase tracking-wider text-emerald-400"
+            }
+          >
+            {roleLabel}
+          </span>
+        </div>
       </div>
-
-      <CloseSessionModal
-        open={closeOpen}
-        onClose={() => setCloseOpen(false)}
-        session={session}
-      />
     </header>
   );
 }
 
-/** Up to two uppercase initials from a display name (falls back to "?"). */
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";

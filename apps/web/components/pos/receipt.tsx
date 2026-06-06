@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@repo/backend";
 import { Button } from "@repo/ui/components/ui/button";
 
-import { money } from "@/lib/format";
+import { formatCurrency, formatNumber } from "@/lib/format";
 
 export interface ReceiptLine {
   product_name: string;
@@ -103,10 +103,10 @@ export function Receipt({ data, onNewSale }: ReceiptProps) {
                     {line.quantity}
                   </td>
                   <td className="py-0.5 text-right tabular-nums">
-                    {line.unit_price.toFixed(2)}
+                    {formatNumber(line.unit_price)}
                   </td>
                   <td className="py-0.5 text-right tabular-nums">
-                    {line.line_total.toFixed(2)}
+                    {formatNumber(line.line_total)}
                   </td>
                 </tr>
               ))}
@@ -120,27 +120,27 @@ export function Receipt({ data, onNewSale }: ReceiptProps) {
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span className="tabular-nums">
-                {money(data.subtotal, data.currency)}
+                {formatCurrency(data.subtotal, data.currency)}
               </span>
             </div>
             {data.discount_total > 0 && (
               <div className="flex justify-between">
                 <span>Discount</span>
                 <span className="tabular-nums">
-                  −{money(data.discount_total, data.currency)}
+                  −{formatCurrency(data.discount_total, data.currency)}
                 </span>
               </div>
             )}
             <div className="flex justify-between">
               <span>Tax</span>
               <span className="tabular-nums">
-                {money(data.tax_total, data.currency)}
+                {formatCurrency(data.tax_total, data.currency)}
               </span>
             </div>
             <div className="flex justify-between text-sm font-bold">
               <span>TOTAL</span>
               <span className="tabular-nums">
-                {money(data.grand_total, data.currency)}
+                {formatCurrency(data.grand_total, data.currency)}
               </span>
             </div>
           </div>
