@@ -1,6 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import { useQuery } from "convex/react";
+import { api } from "@repo/backend";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   Card,
@@ -17,10 +18,10 @@ import {
 } from "@repo/ui/components/ui/input-otp";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
-import { logo } from "@repo/assets/logos";
 import { useSignInFlow } from "@repo/auth/hooks";
 
 export default function SignInPage() {
+  const storePublic = useQuery(api.settings.storeSettings.getPublic);
   const {
     step,
     email,
@@ -39,7 +40,14 @@ export default function SignInPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-6">
       <div className="flex w-full max-w-sm flex-col items-center gap-6">
-        <Image src={logo} alt="Repo Logo" width={100} />
+        {storePublic?.logo_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={storePublic.logo_url}
+            alt={storePublic.store_name ?? "Store logo"}
+            className="mx-auto h-12 w-12 rounded-full object-cover"
+          />
+        ) : null}
         {step === "signIn" ? (
           <Card className="w-full">
             <CardHeader className="text-center">

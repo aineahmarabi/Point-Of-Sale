@@ -35,6 +35,20 @@ export const current = query({
   },
 });
 
+/** Public — no auth required. Returns only the fields safe to show on the
+ *  sign-in page (store name + logo URL). */
+export const getPublic = query({
+  args: {},
+  handler: async (ctx) => {
+    const settings = await ctx.db.query("store_settings").first();
+    if (!settings) return null;
+    return {
+      store_name: settings.store_name,
+      logo_url: settings.logo_url ?? null,
+    };
+  },
+});
+
 export const upsert = mutation({
   args: store_settings,
   handler: async (ctx, args) => {
