@@ -9,6 +9,7 @@ import { useData } from "@repo/auth/hooks";
 import { Button } from "@repo/ui/components/ui/button";
 
 import { cashierName } from "@/lib/format";
+import { isAdminRole } from "@/lib/auth";
 
 /** Terminal top bar — clock, cashier identity, and exit action. */
 export function TerminalHeader() {
@@ -26,10 +27,9 @@ export function TerminalHeader() {
   const storeName = settings?.store_name ?? "POS Terminal";
   const fullName = cashierName(currentUser);
 
-  const isAdmin =
-    currentUser?.role?.permissions?.includes("*") ||
-    currentUser?.role?.name?.toLowerCase().includes("admin") ||
-    !!currentUser?.is_admin;
+  // Use the shared role helper — reads live role.name/permissions only.
+  // Never reads the stale is_admin boolean on the user record.
+  const isAdmin = isAdminRole(currentUser?.role);
   const roleLabel = isAdmin ? "Admin" : "Cashier";
 
   const storeInitial = storeName.charAt(0).toUpperCase();

@@ -28,28 +28,59 @@
   --ring: #b03a52;
 }
 
-/* ── Receipt printing ────────────────────────────────────────── */
+/* ── Receipt / thermal printer output ───────────────────────── */
+@page {
+  /* Strip browser margins so the receipt starts at the paper edge */
+  margin: 0;
+  /* 80 mm is the standard thermal-receipt roll width */
+  size: 80mm auto;
+}
+
 @media print {
+  html,
+  body {
+    width: 80mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
   body * {
     visibility: hidden;
   }
+
   .receipt-printable,
   .receipt-printable * {
     visibility: visible;
   }
+
   .receipt-printable {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
-    background: white;
-    color: black;
-    font-family: monospace;
-    font-size: 12px;
-    padding: 16px;
-    box-shadow: none;
+    /* Fill the 80 mm roll exactly */
+    width: 80mm;
+    max-width: 80mm;
+    background: white !important;
+    color: black !important;
+    /* Monospace is standard on thermal printers */
+    font-family: "Courier New", Courier, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.4;
+    padding: 4mm;
+    box-shadow: none !important;
+    /* Force colour printing off — thermal printers print black-only */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  /* Hide the action buttons row even if it somehow stays in the DOM */
+
+  /* Dashed borders print as real dashes on thermal paper */
+  .receipt-printable .border-dashed {
+    border-style: dashed !important;
+    border-color: black !important;
+  }
+
+  /* Hide buttons and interactive chrome */
   .print\:hidden {
     display: none !important;
   }
