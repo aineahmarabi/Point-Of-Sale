@@ -45,7 +45,7 @@ export default function SignInPage() {
           <img
             src={storePublic.logo_url}
             alt={storePublic.store_name ?? "Store logo"}
-            className="mx-auto h-12 w-12 rounded-full object-cover"
+            className="mx-auto h-24 w-24 rounded-full object-cover"
           />
         ) : null}
         {step === "signIn" ? (
