@@ -25,6 +25,7 @@ export function TerminalHeader() {
   }, []);
 
   const storeName = settings?.store_name ?? "POS Terminal";
+  const logoUrl = settings?.logo_url ?? null;
   const fullName = cashierName(currentUser);
 
   // Use the shared role helper — reads live role.name/permissions only.
@@ -39,17 +40,28 @@ export function TerminalHeader() {
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-700/60 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 px-6 text-slate-100 shadow-lg shadow-black/20">
       {/* Left — store identity */}
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-burgundy-600 text-base font-bold text-white shadow-sm">
-          {storeInitial}
-        </div>
-        <div className="min-w-0 leading-tight">
-          <p className="truncate text-base font-bold tracking-tight text-white">
-            {storeName}
-          </p>
-          <p className="text-[11px] font-medium uppercase tracking-wider text-burgundy-400">
-            Point of Sale
-          </p>
-        </div>
+        {logoUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={logoUrl}
+            alt={storeName}
+            className="h-9 max-w-[120px] object-contain"
+          />
+        ) : (
+          <>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-burgundy-600 text-base font-bold text-white shadow-sm">
+              {storeInitial}
+            </div>
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-base font-bold tracking-tight text-white">
+                {storeName}
+              </p>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-burgundy-400">
+                Point of Sale
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Center — live clock + date */}

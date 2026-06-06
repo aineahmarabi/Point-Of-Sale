@@ -173,7 +173,9 @@ export function AdminSidebar({
   const live = useConnectionLive();
   const settings = useQuery(api.settings.storeSettings.current);
   const storeName = settings?.store_name ?? "POS";
+  const logoUrl = settings?.logo_url ?? null;
   const roleName = user.role?.name ?? "Staff";
+  const storeInitial = storeName.charAt(0).toUpperCase();
 
   const overview = NAV.find((g) => g.title === "Overview");
   const collapsibleGroups = NAV.filter((g) => g.title !== "Overview");
@@ -216,10 +218,24 @@ export function AdminSidebar({
         )}
       >
         <div className="flex items-start justify-between gap-2 px-5 py-4">
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-lg font-bold tracking-tight text-burgundy-400">
-              {storeName}
-            </span>
+          <div className="flex min-w-0 flex-col gap-1">
+            {logoUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={logoUrl}
+                alt={storeName}
+                className="h-10 max-w-[140px] object-contain"
+              />
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-burgundy-600 text-sm font-bold text-white">
+                  {storeInitial}
+                </div>
+                <span className="truncate text-base font-bold tracking-tight text-burgundy-400">
+                  {storeName}
+                </span>
+              </div>
+            )}
             <LiveBadge live={live} />
           </div>
           <button

@@ -244,11 +244,11 @@ export function ProductGrid({ currency }: { currency: string }) {
                   type="button"
                   onClick={() => handleProductClick(product)}
                   className={cn(
-                    "flex min-h-[56px] w-full items-center gap-3 bg-slate-800 px-4 py-3 text-left transition hover:bg-slate-700 active:bg-slate-600",
+                    "flex h-16 w-full items-center gap-3 border-b border-slate-700 bg-slate-800 px-4 text-left transition hover:bg-slate-700 active:bg-slate-600",
                     outOfStock && "opacity-50",
                   )}
                 >
-                  {/* Thumbnail */}
+                  {/* Thumbnail — 40×40 */}
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-700">
                     {imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -266,36 +266,35 @@ export function ProductGrid({ currency }: { currency: string }) {
                     )}
                   </div>
 
-                  {/* Name + category */}
+                  {/* Name + category — takes remaining space */}
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold leading-tight text-white">
+                    <p className="truncate text-sm font-semibold text-white">
                       {product.name}
                       {hasVariants && (
                         <span className="ml-1.5 text-[10px] font-normal text-slate-400">
-                          multiple options
+                          · options
                         </span>
                       )}
                     </p>
-                    {product.category_name ? (
-                      <p className="mt-0.5 truncate text-xs text-slate-400">
-                        {product.category_name}
-                      </p>
-                    ) : null}
+                    <p className="truncate text-xs text-slate-400">
+                      {product.category_name ?? ""}
+                    </p>
                   </div>
 
-                  {/* Stock badge */}
-                  <StockBadge product={product} stock={stock} />
-
-                  {/* Price + add */}
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="text-sm font-bold tabular-nums text-emerald-400">
-                      {formatCurrency(product.selling_price, currency)}
-                    </span>
-                    <span className="flex items-center gap-0.5 rounded-md bg-burgundy-600 px-2 py-0.5 text-[11px] font-semibold text-white">
-                      <HugeiconsIcon icon={Add01Icon} size={12} />
-                      Add
-                    </span>
+                  {/* Stock badge — fixed */}
+                  <div className="shrink-0">
+                    <StockBadge product={product} stock={stock} />
                   </div>
+
+                  {/* Price — fixed width, right-aligned */}
+                  <span className="w-24 shrink-0 text-right text-sm font-bold tabular-nums text-emerald-400">
+                    {formatCurrency(product.selling_price, currency)}
+                  </span>
+
+                  {/* Add button — fixed */}
+                  <span className="shrink-0 rounded-lg bg-burgundy-600 px-3 py-1.5 text-xs font-semibold text-white">
+                    Add
+                  </span>
                 </button>
               );
             })}
