@@ -40,7 +40,11 @@ export function Receipt({ data, onNewSale }: ReceiptProps) {
   return (
     <div className="fixed inset-0 z-[60] overflow-y-auto bg-white">
       <div className="mx-auto max-w-sm px-6 py-8">
-        <div id="pos-receipt" className="font-mono text-sm text-zinc-900">
+        {/* receipt-printable: only this section is visible during window.print() */}
+        <div
+          id="pos-receipt"
+          className="receipt-printable font-mono text-sm text-zinc-900"
+        >
           {/* Header */}
           <div className="text-center">
             <p className="text-base font-bold">

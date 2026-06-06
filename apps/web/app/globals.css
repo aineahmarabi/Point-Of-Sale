@@ -28,6 +28,33 @@
   --ring: #b03a52;
 }
 
+/* ── Receipt printing ────────────────────────────────────────── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-printable,
+  .receipt-printable * {
+    visibility: visible;
+  }
+  .receipt-printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    color: black;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 16px;
+    box-shadow: none;
+  }
+  /* Hide the action buttons row even if it somehow stays in the DOM */
+  .print\:hidden {
+    display: none !important;
+  }
+}
+
 /* ── Remove number-input spinner arrows everywhere ───────────── */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
