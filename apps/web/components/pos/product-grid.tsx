@@ -64,6 +64,7 @@ export function ProductGrid({ currency }: { currency: string }) {
   const { addItem } = useCart();
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<Id<"categories"> | "all">("all");
+  const [sort, setSort] = useState<"alpha" | "latest">("alpha");
   const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -140,16 +141,22 @@ export function ProductGrid({ currency }: { currency: string }) {
   }
 
   const products = useMemo(() => {
-    const all = (productsResult?.page ?? []) as Product[];
+    let all = (productsResult?.page ?? []) as Product[];
     const q = search.trim().toLowerCase();
-    if (!q) return all;
-    return all.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.sku?.toLowerCase().includes(q) ?? false) ||
-        (p.barcode?.toLowerCase().includes(q) ?? false),
-    );
-  }, [productsResult, search]);
+    if (q) {
+      all = all.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.sku?.toLowerCase().includes(q) ?? false) ||
+          (p.barcode?.toLowerCase().includes(q) ?? false),
+      );
+    }
+    if (sort === "alpha") {
+      all = [...all].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    // "latest" keeps Convex's default insertion order (newest first)
+    return all;
+  }, [productsResult, search, sort]);
 
   const categories = (categoriesResult?.page ?? []).filter(
     (c) => c.status === "active",
@@ -157,8 +164,8 @@ export function ProductGrid({ currency }: { currency: string }) {
 
   return (
     <div className="flex h-full flex-col bg-slate-900 text-slate-100">
-      {/* Search */}
-      <div className="shrink-0 p-4">
+      {/* Search + sort */}
+      <div className="shrink-0 space-y-2 p-4 pb-2">
         <Input
           placeholder="Search by name, SKU or barcode…"
           value={search}
@@ -166,6 +173,32 @@ export function ProductGrid({ currency }: { currency: string }) {
           className="h-12 border-slate-700 bg-slate-800 text-base text-slate-100 placeholder:text-slate-500 focus-visible:ring-burgundy-500"
           autoFocus
         />
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setSort("alpha")}
+            className={cn(
+              "rounded-md px-3 py-1 text-xs font-medium transition",
+              sort === "alpha"
+                ? "bg-burgundy-500 text-white"
+                : "bg-slate-800 text-slate-400 hover:text-slate-200",
+            )}
+          >
+            A – Z
+          </button>
+          <button
+            type="button"
+            onClick={() => setSort("latest")}
+            className={cn(
+              "rounded-md px-3 py-1 text-xs font-medium transition",
+              sort === "latest"
+                ? "bg-burgundy-500 text-white"
+                : "bg-slate-800 text-slate-400 hover:text-slate-200",
+            )}
+          >
+            Latest
+          </button>
+        </div>
       </div>
 
       {/* Category pills — horizontal scroll */}

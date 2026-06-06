@@ -228,28 +228,31 @@ export function PaymentModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} dismissable={phase !== "processing"}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      dismissable={phase !== "processing"}
+      className="bg-slate-800 text-slate-100 sm:border sm:border-slate-700"
+    >
       {phase === "success" ? (
         <div className="space-y-6 p-8 text-center">
-          <div className="animate-checkmark mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl text-green-600">
+          <div className="animate-checkmark mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 text-3xl text-green-400">
             ✓
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Sale Complete</h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Order {orderNumber}
-            </p>
+            <h2 className="text-xl font-bold text-white">Sale Complete</h2>
+            <p className="mt-1 text-sm text-slate-400">Order {orderNumber}</p>
           </div>
           <div className="flex gap-3">
             <Button
               variant="outline"
-              className="h-12 flex-1"
+              className="h-12 flex-1 border-slate-600 bg-transparent text-slate-200 hover:bg-slate-700"
               onClick={() => setShowReceipt(true)}
             >
               Print Receipt
             </Button>
             <Button
-              className="h-12 flex-1 bg-burgundy-600 hover:bg-burgundy-700"
+              className="h-12 flex-1 bg-burgundy-500 font-bold text-white hover:bg-burgundy-600"
               onClick={handleNewSale}
             >
               New Sale
@@ -258,16 +261,21 @@ export function PaymentModal({
         </div>
       ) : (
         <div className="space-y-5 p-6">
-          <div className="text-center">
-            <p className="text-muted-foreground text-sm">Total Due</p>
-            <p className="text-4xl font-bold tabular-nums">
+          {/* Total */}
+          <div className="rounded-xl bg-slate-900/60 py-5 text-center">
+            <p className="text-sm font-medium uppercase tracking-wider text-slate-400">
+              Total Due
+            </p>
+            <p className="mt-1 text-4xl font-bold tabular-nums text-white">
               {money(grand_total, currency)}
             </p>
           </div>
 
-          {/* Payment method selection */}
+          {/* Payment method */}
           <div>
-            <Label className="mb-2 block">Payment Method</Label>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Payment Method
+            </p>
             <div className="grid grid-cols-3 gap-2">
               <MethodCard
                 active={method === "cash"}
@@ -293,7 +301,9 @@ export function PaymentModal({
           {method === "cash" && (
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="cash-received">Amount Received</Label>
+                <Label htmlFor="cash-received" className="text-slate-300">
+                  Amount Received
+                </Label>
                 <Input
                   id="cash-received"
                   type="number"
@@ -301,22 +311,22 @@ export function PaymentModal({
                   step="0.01"
                   value={cashAmount}
                   onChange={(e) => setCashAmount(e.target.value)}
-                  className="h-12 text-lg"
+                  className="h-12 border-slate-600 bg-slate-900 text-lg font-semibold text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
                   autoFocus
                 />
               </div>
               {change > 0 && (
-                <div className="flex items-center justify-between rounded-lg bg-burgundy-50 px-4 py-3">
-                  <span className="text-sm font-medium text-burgundy-800">
+                <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 px-4 py-3">
+                  <span className="text-sm font-semibold text-emerald-300">
                     Change Due
                   </span>
-                  <span className="text-2xl font-bold tabular-nums text-burgundy-600">
+                  <span className="text-2xl font-bold tabular-nums text-emerald-400">
                     {money(change, currency)}
                   </span>
                 </div>
               )}
               {cashShort && (
-                <p className="text-sm text-amber-600">
+                <p className="text-sm text-amber-400">
                   Amount received is less than the total due.
                 </p>
               )}
@@ -327,23 +337,25 @@ export function PaymentModal({
           {method === "paybill" && (
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="mpesa-ref">M-Pesa Ref (optional)</Label>
+                <Label htmlFor="mpesa-ref" className="text-slate-300">
+                  M-Pesa Ref (optional)
+                </Label>
                 <Input
                   id="mpesa-ref"
                   value={mpesaRef}
                   maxLength={10}
                   onChange={(e) => setMpesaRef(e.target.value.toUpperCase())}
                   placeholder="e.g. 9P2X"
-                  className="h-12 text-lg"
+                  className="h-12 border-slate-600 bg-slate-900 font-mono text-lg uppercase text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
                   autoFocus
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Internal Ref</Label>
+                <Label className="text-slate-300">Internal Ref</Label>
                 <Input
                   value={internalRef}
                   readOnly
-                  className="bg-muted h-12 font-mono text-lg"
+                  className="h-12 border-slate-700 bg-slate-900/50 font-mono text-lg text-slate-400"
                 />
               </div>
             </div>
@@ -353,7 +365,9 @@ export function PaymentModal({
           {method === "split" && (
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="split-cash">Cash Amount</Label>
+                <Label htmlFor="split-cash" className="text-slate-300">
+                  Cash Amount
+                </Label>
                 <Input
                   id="split-cash"
                   type="number"
@@ -361,50 +375,54 @@ export function PaymentModal({
                   step="0.01"
                   value={cashAmount}
                   onChange={(e) => setCashAmount(e.target.value)}
-                  className="h-12 text-lg"
+                  className="h-12 border-slate-600 bg-slate-900 text-lg font-semibold text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
                   autoFocus
                 />
               </div>
-              <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-4 py-3">
-                <span className="text-sm font-medium">M-Pesa Amount</span>
-                <span className="text-lg font-bold tabular-nums">
+              <div className="flex items-center justify-between rounded-xl bg-slate-900/60 px-4 py-3">
+                <span className="text-sm font-medium text-slate-400">
+                  M-Pesa Amount
+                </span>
+                <span className="text-lg font-bold tabular-nums text-white">
                   {money(splitMpesaAmount, currency)}
                 </span>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="split-mpesa-ref">M-Pesa Ref (optional)</Label>
+                <Label htmlFor="split-mpesa-ref" className="text-slate-300">
+                  M-Pesa Ref (optional)
+                </Label>
                 <Input
                   id="split-mpesa-ref"
                   value={mpesaRef}
                   maxLength={10}
                   onChange={(e) => setMpesaRef(e.target.value.toUpperCase())}
                   placeholder="e.g. 9P2X"
-                  className="h-12 text-lg"
+                  className="h-12 border-slate-600 bg-slate-900 font-mono text-lg uppercase text-white placeholder:text-slate-500 focus-visible:ring-burgundy-500"
                 />
               </div>
               {splitOverpaid && (
-                <p className="text-sm text-amber-600">
+                <p className="text-sm text-amber-400">
                   Cash amount cannot exceed the total due.
                 </p>
               )}
             </div>
           )}
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
 
           <div className="space-y-2">
             <Button
-              className="h-14 w-full bg-burgundy-600 text-lg font-bold hover:bg-burgundy-700"
+              className="h-14 w-full bg-burgundy-500 text-lg font-bold text-white hover:bg-burgundy-600 disabled:bg-slate-600 disabled:text-slate-400"
               onClick={handleConfirm}
               disabled={!canConfirm}
             >
               {phase === "processing"
                 ? "Processing…"
-                : `Confirm Payment · ${money(grand_total, currency)}`}
+                : `Confirm · ${money(grand_total, currency)}`}
             </Button>
             <Button
               variant="ghost"
-              className="h-11 w-full"
+              className="h-11 w-full text-slate-400 hover:bg-slate-700 hover:text-white"
               onClick={onClose}
               disabled={phase === "processing"}
             >
@@ -433,16 +451,14 @@ function MethodCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex min-h-[64px] flex-col items-center justify-center rounded-lg border-2 p-2 text-center transition",
+        "flex min-h-[64px] flex-col items-center justify-center rounded-xl border-2 p-2 text-center transition",
         active
-          ? "border-burgundy-600 bg-burgundy-50"
-          : "border-zinc-200 hover:border-zinc-300",
+          ? "border-burgundy-500 bg-burgundy-500/10 text-white"
+          : "border-slate-600 bg-slate-900/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700",
       )}
     >
-      <span className="text-sm font-semibold">{title}</span>
-      {subtitle && (
-        <span className="text-muted-foreground text-xs">{subtitle}</span>
-      )}
+      <span className="text-sm font-bold">{title}</span>
+      {subtitle && <span className="mt-0.5 text-xs text-slate-400">{subtitle}</span>}
     </button>
   );
 }

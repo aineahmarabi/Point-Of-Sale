@@ -13,9 +13,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { email?: string; role?: string };
+  let body: {
+    email?: string;
+    role?: string;
+    firstName?: string;
+    lastName?: string;
+  };
   try {
-    body = (await req.json()) as { email?: string; role?: string };
+    body = (await req.json()) as typeof body;
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -29,6 +34,8 @@ export async function POST(req: Request) {
     );
   }
 
+  const firstName = body.firstName?.trim() ?? "";
+  const lastName = body.lastName?.trim() ?? "";
   const isAdmin = role.toLowerCase().includes("admin");
 
   try {
@@ -39,6 +46,8 @@ export async function POST(req: Request) {
         role,
         app: isAdmin ? ["web", "admin"] : ["web"],
         status: "active",
+        ...(firstName ? { first_name: firstName } : {}),
+        ...(lastName ? { last_name: lastName } : {}),
       },
       ignoreExisting: true,
     });

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@repo/ui/components/ui/button";
 import {
@@ -81,14 +80,8 @@ export default function SignInPage() {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Signing in…" : "Sign in"}
                 </Button>
-                <p className="text-muted-foreground text-center text-sm">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    href="/sign-up"
-                    className="text-primary underline-offset-4 hover:underline"
-                  >
-                    Sign up
-                  </Link>
+                <p className="text-muted-foreground text-center text-xs">
+                  Access is by invitation only.
                 </p>
               </form>
             </CardContent>

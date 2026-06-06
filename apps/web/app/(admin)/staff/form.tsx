@@ -36,6 +36,8 @@ export function StaffInviteModal({
     open ? { app: "admin" } : "skip",
   );
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [choice, setChoice] = useState<"admin" | "cashier">("cashier");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,8 @@ export function StaffInviteModal({
   useEffect(() => {
     if (!open) {
       setEmail("");
+      setFirstName("");
+      setLastName("");
       setChoice("cashier");
       setError(null);
       setSubmitting(false);
@@ -78,7 +82,12 @@ export function StaffInviteModal({
       const res = await fetch("/api/staff/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), role: roleName }),
+        body: JSON.stringify({
+          email: email.trim(),
+          role: roleName,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+        }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to send invitation.");
@@ -109,13 +118,35 @@ export function StaffInviteModal({
           </div>
         ) : (
           <form onSubmit={handleInvite} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="invite-first">First Name</Label>
+                <Input
+                  id="invite-first"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Jane"
+                  className="h-11"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="invite-last">Last Name</Label>
+                <Input
+                  id="invite-last"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Doe"
+                  className="h-11"
+                />
+              </div>
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="invite-email">Email</Label>
               <Input
                 id="invite-email"
                 type="email"
                 required
-                autoFocus
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="staff@example.com"
@@ -199,12 +230,13 @@ export function StaffEditModal({
   const updateStaff = useMutation(api.user.users.updateStaff);
   const [choice, setChoice] = useState<"admin" | "cashier">("cashier");
   const [status, setStatus] = useState<(typeof userStatus)[number]>("active");
+  const [editFirst, setEditFirst] = useState("");
+  const [editLast, setEditLast] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && staff) {
-      // Derive the current access level: a wildcard/admin role → "admin".
       const currentRole = roles.find((r) => r._id === staff.role);
       const isAdmin =
         currentRole?.permissions?.includes("*") ??
@@ -212,6 +244,8 @@ export function StaffEditModal({
         staff.is_admin;
       setChoice(isAdmin ? "admin" : "cashier");
       setStatus(staff.status);
+      setEditFirst(staff.name?.first ?? "");
+      setEditLast(staff.name?.last ?? "");
       setError(null);
       setSubmitting(false);
     }
@@ -227,10 +261,15 @@ export function StaffEditModal({
     setSubmitting(true);
     setError(null);
     try {
+      const namePayload =
+        editFirst.trim() || editLast.trim()
+          ? { first: editFirst.trim(), last: editLast.trim() }
+          : undefined;
       await updateStaff({
         id: staff._id,
         role: roleId,
         status,
+        ...(namePayload ? { name: namePayload } : {}),
       });
       notifySuccess("Staff member updated.");
       onClose();
@@ -250,12 +289,30 @@ export function StaffEditModal({
       <div className="space-y-5 p-6">
         <h2 className="text-xl font-semibold">Edit Staff</h2>
         {staff && (
-          <p className="text-muted-foreground text-sm">
-            {staff.name
-              ? `${staff.name.first} ${staff.name.last}`
-              : staff.email}
-          </p>
+          <p className="text-muted-foreground text-sm">{staff.email}</p>
         )}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-first">First Name</Label>
+            <Input
+              id="edit-first"
+              value={editFirst}
+              onChange={(e) => setEditFirst(e.target.value)}
+              placeholder="Jane"
+              className="h-11"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-last">Last Name</Label>
+            <Input
+              id="edit-last"
+              value={editLast}
+              onChange={(e) => setEditLast(e.target.value)}
+              placeholder="Doe"
+              className="h-11"
+            />
+          </div>
+        </div>
         <div className="space-y-1.5">
           <Label>Role</Label>
           <Select

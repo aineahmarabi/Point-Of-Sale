@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Doc } from "@repo/backend/dataModel";
 import { useData } from "@repo/auth/hooks";
 import { Button } from "@repo/ui/components/ui/button";
@@ -15,14 +15,6 @@ interface CartPanelProps {
   session: Doc<"sessions">;
   currency: string;
   requireCustomer: boolean;
-}
-
-function formatElapsed(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  return [h, m, s].map((n) => String(n).padStart(2, "0")).join(":");
 }
 
 export function CartPanel({
@@ -49,14 +41,7 @@ export function CartPanel({
   const [discountOpen, setDiscountOpen] = useState(false);
   const [customerOpen, setCustomerOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [now, setNow] = useState<number>(() => Date.now());
 
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const elapsed = formatElapsed(now - session.opened_at);
   const blockedNoCustomer = requireCustomer && !customer;
   const canCharge = items.length > 0 && !blockedNoCustomer;
 
@@ -73,8 +58,7 @@ export function CartPanel({
           </h2>
         </div>
         <p className="mt-1 text-xs text-slate-400">
-          {cashierName(currentUser)} ·{" "}
-          <span className="font-mono tabular-nums">{elapsed}</span> on shift
+          {cashierName(currentUser)}
         </p>
       </div>
 

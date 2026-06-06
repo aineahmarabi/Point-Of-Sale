@@ -130,10 +130,15 @@ export const clerkWebhook = httpAction(async (ctx, req) => {
     : [meta.app ?? "web"];
   const isAdmin = appArray.includes("admin");
 
+  // Name: prefer what the user entered at signup; fall back to what the admin
+  // supplied in the invite metadata (stored as meta.first_name / meta.last_name).
+  const firstName: string = data.first_name || meta.first_name || "";
+  const lastName: string = data.last_name || meta.last_name || "";
+
   const userFields = {
     name:
-      data.first_name || data.last_name
-        ? { first: data.first_name ?? "", last: data.last_name ?? "" }
+      firstName || lastName
+        ? { first: firstName, last: lastName }
         : undefined,
     email: data.email_addresses[0].email_address,
     phone: meta.phone ?? undefined,

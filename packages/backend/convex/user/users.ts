@@ -177,12 +177,13 @@ export const count = query({
   },
 });
 
-/** Admin staff management: change a user's role and/or status. */
+/** Admin staff management: change a user's role, status, and optionally name. */
 export const updateStaff = mutation({
   args: {
     id: v.id("users"),
     role: v.optional(v.id("roles")),
     status: users.status,
+    name: v.optional(v.object({ first: v.string(), last: v.string() })),
   },
   handler: async (ctx, args) => {
     await assertPermission(ctx, "staff:update");
@@ -205,10 +206,10 @@ export const updateStaff = mutation({
       ...(args.role
         ? {
             role: args.role,
-            // Keep is_admin in sync with whether the role grants admin access.
             is_admin: await roleIsAdmin(ctx, args.role),
           }
         : {}),
+      ...(args.name ? { name: args.name } : {}),
     });
     return args.id;
   },
