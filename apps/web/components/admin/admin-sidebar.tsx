@@ -219,23 +219,23 @@ export function AdminSidebar({
       >
         <div className="flex items-start justify-between gap-2 px-5 py-4">
           <div className="flex min-w-0 flex-col gap-1">
-            {logoUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={logoUrl}
-                alt={storeName}
-                className="h-10 max-w-[140px] object-contain"
-              />
-            ) : (
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-burgundy-600 text-sm font-bold text-white">
+            <div className="flex items-center gap-2">
+              {logoUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={logoUrl}
+                  alt={storeName}
+                  className="h-10 w-10 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy-600 text-sm font-bold text-white">
                   {storeInitial}
                 </div>
-                <span className="truncate text-base font-bold tracking-tight text-burgundy-400">
-                  {storeName}
-                </span>
-              </div>
-            )}
+              )}
+              <span className="truncate text-base font-bold tracking-tight text-burgundy-400">
+                {storeName}
+              </span>
+            </div>
             <LiveBadge live={live} />
           </div>
           <button
