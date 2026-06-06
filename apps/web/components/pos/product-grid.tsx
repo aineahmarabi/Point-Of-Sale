@@ -5,12 +5,12 @@ import { useQuery } from "convex/react";
 import { api } from "@repo/backend";
 import type { Doc, Id } from "@repo/backend/dataModel";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Package01Icon } from "@hugeicons/core-free-icons";
+import { Package01Icon, Add01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@repo/ui/lib/utils";
 import { Input } from "@repo/ui/components/ui/input";
 
 import { useCart } from "@/context/cart-context";
-import { money } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { VariantPickerModal } from "./variant-picker-modal";
 
 type Product = Doc<"products"> & { category_name?: string | null };
@@ -164,41 +164,23 @@ export function ProductGrid({ currency }: { currency: string }) {
 
   return (
     <div className="flex h-full flex-col bg-slate-900 text-slate-100">
-      {/* Search + sort */}
-      <div className="shrink-0 space-y-2 p-4 pb-2">
+      {/* Search + sort dropdown */}
+      <div className="shrink-0 flex gap-2 p-4 pb-2">
         <Input
           placeholder="Search by name, SKU or barcode…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-12 border-slate-700 bg-slate-800 text-base text-slate-100 placeholder:text-slate-500 focus-visible:ring-burgundy-500"
+          className="h-11 min-w-0 flex-1 border-slate-700 bg-slate-800 text-sm text-slate-100 placeholder:text-slate-500 focus-visible:ring-burgundy-500"
           autoFocus
         />
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setSort("alpha")}
-            className={cn(
-              "rounded-md px-3 py-1 text-xs font-medium transition",
-              sort === "alpha"
-                ? "bg-burgundy-500 text-white"
-                : "bg-slate-800 text-slate-400 hover:text-slate-200",
-            )}
-          >
-            A – Z
-          </button>
-          <button
-            type="button"
-            onClick={() => setSort("latest")}
-            className={cn(
-              "rounded-md px-3 py-1 text-xs font-medium transition",
-              sort === "latest"
-                ? "bg-burgundy-500 text-white"
-                : "bg-slate-800 text-slate-400 hover:text-slate-200",
-            )}
-          >
-            Latest
-          </button>
-        </div>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as "alpha" | "latest")}
+          className="h-11 shrink-0 rounded-md border border-slate-700 bg-slate-800 px-2 text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-burgundy-500"
+        >
+          <option value="alpha">A – Z</option>
+          <option value="latest">Latest</option>
+        </select>
       </div>
 
       {/* Category pills — horizontal scroll */}
@@ -222,18 +204,20 @@ export function ProductGrid({ currency }: { currency: string }) {
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      {/* Product list */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {productsResult === undefined ? (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex min-h-[150px] flex-col rounded-lg bg-slate-700 p-3"
-              >
-                <div className="shimmer mb-2 aspect-square rounded-md" />
-                <div className="shimmer mb-2 h-3.5 w-3/4 rounded" />
-                <div className="shimmer h-3 w-1/2 rounded" />
+          // Skeleton rows
+          <div className="divide-y divide-slate-700/60">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3">
+                <div className="shimmer h-10 w-10 shrink-0 rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <div className="shimmer h-3.5 w-2/3 rounded" />
+                  <div className="shimmer h-3 w-1/3 rounded" />
+                </div>
+                <div className="shimmer h-6 w-16 rounded-full" />
+                <div className="shimmer h-8 w-14 rounded-md" />
               </div>
             ))}
           </div>
@@ -242,27 +226,30 @@ export function ProductGrid({ currency }: { currency: string }) {
             No products found.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          <div className="divide-y divide-slate-700/60">
             {products.map((product) => {
               const stock = stockMap.get(product._id);
               const outOfStock = !product.is_service && stock?.quantity === 0;
-              const variantCount = (variantMap.get(product._id) ?? []).filter(
-                (v) => v.status === "active",
-              ).length;
+              const hasVariants =
+                (variantMap.get(product._id) ?? []).filter(
+                  (v) => v.status === "active",
+                ).length > 0;
               const imageUrl = product.images?.[0]?.startsWith("http")
                 ? product.images[0]
                 : null;
+
               return (
                 <button
                   key={product._id}
                   type="button"
                   onClick={() => handleProductClick(product)}
                   className={cn(
-                    "flex min-h-[150px] flex-col rounded-lg bg-slate-700 p-3 text-left transition hover:bg-slate-600 active:scale-[0.98]",
+                    "flex min-h-[56px] w-full items-center gap-3 bg-slate-800 px-4 py-3 text-left transition hover:bg-slate-700 active:bg-slate-600",
                     outOfStock && "opacity-50",
                   )}
                 >
-                  <div className="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-md bg-slate-800">
+                  {/* Thumbnail */}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-700">
                     {imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -273,24 +260,41 @@ export function ProductGrid({ currency }: { currency: string }) {
                     ) : (
                       <HugeiconsIcon
                         icon={Package01Icon}
-                        size={44}
+                        size={20}
                         className="text-slate-500"
                       />
                     )}
                   </div>
-                  <div className="line-clamp-2 text-sm font-bold leading-tight text-white">
-                    {product.name}
+
+                  {/* Name + category */}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold leading-tight text-white">
+                      {product.name}
+                      {hasVariants && (
+                        <span className="ml-1.5 text-[10px] font-normal text-slate-400">
+                          multiple options
+                        </span>
+                      )}
+                    </p>
+                    {product.category_name ? (
+                      <p className="mt-0.5 truncate text-xs text-slate-400">
+                        {product.category_name}
+                      </p>
+                    ) : null}
                   </div>
-                  <div className="mt-1 text-base font-bold text-burgundy-400">
-                    {money(product.selling_price, currency)}
-                  </div>
-                  <div className="mt-auto flex items-center justify-between gap-1 pt-2">
-                    <StockBadge product={product} stock={stock} />
-                    {variantCount > 0 && (
-                      <span className="rounded-full bg-slate-600 px-2 py-0.5 text-[10px] font-medium text-slate-200">
-                        {variantCount} options
-                      </span>
-                    )}
+
+                  {/* Stock badge */}
+                  <StockBadge product={product} stock={stock} />
+
+                  {/* Price + add */}
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="text-sm font-bold tabular-nums text-emerald-400">
+                      {formatCurrency(product.selling_price, currency)}
+                    </span>
+                    <span className="flex items-center gap-0.5 rounded-md bg-burgundy-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+                      <HugeiconsIcon icon={Add01Icon} size={12} />
+                      Add
+                    </span>
                   </div>
                 </button>
               );

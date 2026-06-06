@@ -46,37 +46,46 @@ interface Range {
   groupBy: "hour" | "day";
 }
 
+/**
+ * Build a [start, end] epoch-ms range for the selected preset.
+ * `now` is passed in as a stable value (captured once when preset changes)
+ * so the query args don't drift on every render.
+ * end is always at least `now` so orders created any time today are captured.
+ */
 function resolveRange(
   preset: Preset,
   customStart: string,
   customEnd: string,
+  now: number,
 ): Range {
-  const now = Date.now();
-  const todayStart = startOfDay(new Date());
+  const todayStart = startOfDay(new Date(now));
   switch (preset) {
     case "today":
       return { start: todayStart, end: now, groupBy: "hour" };
     case "yesterday":
+      // Full 24 h window: yesterday 00:00:00.000 → yesterday 23:59:59.999
       return {
         start: todayStart - DAY,
         end: todayStart - 1,
         groupBy: "hour",
       };
     case "7d":
+      // 7 complete days: 6 days ago 00:00 → now (includes today)
       return { start: todayStart - 6 * DAY, end: now, groupBy: "day" };
     case "30d":
       return { start: todayStart - 29 * DAY, end: now, groupBy: "day" };
     case "month": {
-      const d = new Date();
+      const d = new Date(now);
       const monthStart = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
       return { start: monthStart, end: now, groupBy: "day" };
     }
     case "custom": {
       const s = customStart ? startOfDay(new Date(customStart)) : todayStart;
+      // End = end of the selected end-date (23:59:59.999), or now if no end set.
       const e = customEnd
         ? startOfDay(new Date(customEnd)) + DAY - 1
         : now;
-      return { start: s, end: e, groupBy: "day" };
+      return { start: s, end: Math.max(e, now), groupBy: "day" };
     }
   }
 }
@@ -96,9 +105,14 @@ export default function AnalyticsPage() {
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
 
+  // Refresh `now` whenever the preset changes so the range captures the
+  // current moment rather than when the page first mounted.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const now = useMemo(() => Date.now(), [preset, customStart, customEnd]);
+
   const range = useMemo(
-    () => resolveRange(preset, customStart, customEnd),
-    [preset, customStart, customEnd],
+    () => resolveRange(preset, customStart, customEnd, now),
+    [preset, customStart, customEnd, now],
   );
   const prevRange = useMemo(() => {
     const span = range.end - range.start;

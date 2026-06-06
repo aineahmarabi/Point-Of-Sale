@@ -8,7 +8,12 @@ import { Doc } from "./_generated/dataModel";
  * as [startDate, endDate].
  */
 
-/** Completed orders whose effective timestamp falls within [start, end]. */
+/**
+ * Completed orders whose effective timestamp falls within [start, end].
+ * Uses completed_at when set (set by the cashier client at checkout time).
+ * Falls back to _creationTime so records without completed_at are still found.
+ * Both start and end must be unix epoch milliseconds.
+ */
 async function completedOrdersInRange(
   ctx: QueryCtx,
   start: number,
@@ -19,7 +24,10 @@ async function completedOrdersInRange(
     .withIndex("by_status", (q) => q.eq("status", "completed"))
     .collect();
   return completed.filter((o) => {
-    const t = o.completed_at ?? o._creationTime;
+    // completed_at is set by the browser via Date.now() at checkout.
+    // _creationTime is set by Convex server when the document is inserted.
+    // Prefer completed_at; it is stored as a float64 but always an integer ms.
+    const t = typeof o.completed_at === "number" ? o.completed_at : o._creationTime;
     return t >= start && t <= end;
   });
 }
