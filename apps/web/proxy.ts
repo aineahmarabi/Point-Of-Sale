@@ -1,9 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// The only unauthenticated route is the sign-in page.
-// Invite links redirect to /sign-in?__clerk_ticket=... which is covered by this matcher.
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)"]);
+// Public auth routes. /sign-up is required by Clerk's invite acceptance flow
+// even though we don't host a custom sign-up page.
+const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
