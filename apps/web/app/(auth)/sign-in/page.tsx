@@ -65,7 +65,7 @@ export default function SignInPage() {
         ) : null}
 
         {step === "signIn" ? (
-          <Card className="w-full rounded-2xl bg-white shadow-2xl">
+          <Card className="w-full rounded-2xl bg-gradient-to-br from-white via-rose-50 to-amber-50 shadow-2xl border border-white/20">
             <CardHeader className="text-center">
               <CardTitle className="font-serif text-2xl">
                 Welcome back
@@ -122,7 +122,7 @@ export default function SignInPage() {
                   </div>
                 </div>
                 {error && <p className="text-destructive text-sm">{error}</p>}
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full bg-[#7B1C1C] hover:bg-[#6a1818] text-white" disabled={loading}>
                   {loading ? "Signing in…" : "Sign in"}
                 </Button>
                 <p className="text-muted-foreground text-center text-xs">
@@ -132,7 +132,7 @@ export default function SignInPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="w-full rounded-2xl bg-white shadow-2xl">
+          <Card className="w-full rounded-2xl bg-gradient-to-br from-white via-rose-50 to-amber-50 shadow-2xl border border-white/20">
             <CardHeader className="text-center">
               <CardTitle className="font-serif text-2xl">
                 Verify your identity
@@ -165,7 +165,7 @@ export default function SignInPage() {
                 )}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-[#7B1C1C] hover:bg-[#6a1818] text-white"
                   disabled={loading || otp.length < 6}
                 >
                   {loading ? "Verifying…" : "Verify"}
