@@ -83,7 +83,7 @@ export default function InventoryAdjustments() {
   }, []);
 
   return (
-    <main className="flex flex-1 flex-col overflow-hidden">
+    <main className="flex flex-1 flex-col overflow-hidden pb-20">
       <div className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 sm:px-8 sm:py-4">
         <PermissionGuard permission="inventory:adjust">
           <div className="ml-auto">

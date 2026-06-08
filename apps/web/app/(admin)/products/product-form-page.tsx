@@ -428,7 +428,7 @@ export function ProductFormPage({
 
   if (loadingEdit) {
     return (
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <main className="p-4 pb-20 sm:p-6 sm:pb-20 lg:p-8 lg:pb-20">
         <div className="mx-auto max-w-3xl space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div

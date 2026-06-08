@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
       <body
-        className={`${kumbhSans.variable} ${poltawskiSerif.variable} ${geistMono.variable} h-full overflow-x-hidden`}
+        className={`${kumbhSans.variable} ${poltawskiSerif.variable} ${geistMono.variable} h-full`}
       >
         <AuthProvider>{children}</AuthProvider>
         <Toaster richColors closeButton position="top-right" />
