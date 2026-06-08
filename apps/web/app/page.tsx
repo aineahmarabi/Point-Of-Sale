@@ -25,7 +25,7 @@ export default function RootPage() {
   }, [currentUser, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-900 text-slate-400">
+    <div className="flex h-full w-full items-center justify-center bg-slate-900 text-slate-400">
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-700 border-t-burgundy-400" />
     </div>
   );

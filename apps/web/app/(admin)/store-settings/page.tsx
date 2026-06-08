@@ -149,7 +149,7 @@ export default function StoreSettings() {
   }
 
   return (
-    <div className="min-h-full p-6 pb-20">
+    <div className="p-6 w-full">
         <div className="mb-6">
           <p className="text-muted-foreground text-sm">
             Configure your store details, receipts and selling rules.

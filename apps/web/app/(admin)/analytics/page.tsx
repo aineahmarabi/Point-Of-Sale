@@ -183,7 +183,7 @@ export default function AnalyticsPage() {
   const pieTotal = pieData.reduce((s, d) => s + d.value, 0);
 
   return (
-    <main className="p-4 pb-20 sm:p-6 sm:pb-20 lg:p-8 lg:pb-20">
+    <main className="p-6 w-full">
       {/* Date filter bar — horizontally scrollable on mobile */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {PRESETS.map((p) => (

@@ -58,7 +58,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <main className="p-4 pb-20 sm:p-6 sm:pb-20 lg:p-8 lg:pb-20">
+    <main className="p-6 w-full">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-slate-500">Today&apos;s activity at a glance.</p>
         <Link

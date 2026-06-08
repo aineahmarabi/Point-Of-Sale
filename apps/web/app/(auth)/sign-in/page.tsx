@@ -38,7 +38,7 @@ export default function SignInPage() {
   } = useSignInFlow();
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
+    <div className="flex h-full w-full items-center justify-center bg-gray-50 px-6">
       <div className="flex w-full max-w-sm flex-col items-center gap-6">
         {storePublic?.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element

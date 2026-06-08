@@ -129,11 +129,11 @@ function PosShell({ children }: { children: ReactNode }) {
 
   return (
     <CartProvider>
-      <div className="flex h-screen flex-col bg-slate-900">
+      <div className="flex h-full w-full flex-col overflow-hidden bg-slate-900">
         {isAdminRole(currentUser?.role) && (
           <Link
             href="/dashboard"
-            className="flex items-center justify-center gap-2 bg-burgundy-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-burgundy-700"
+            className="flex shrink-0 items-center justify-center gap-2 bg-burgundy-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-burgundy-700"
           >
             <span className="uppercase tracking-wide">Admin View</span>
             <span className="opacity-70">—</span>
@@ -143,7 +143,7 @@ function PosShell({ children }: { children: ReactNode }) {
           </Link>
         )}
         <TerminalHeader />
-        <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+        <div className="flex-1 overflow-hidden">{children}</div>
       </div>
     </CartProvider>
   );

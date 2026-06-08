@@ -161,7 +161,7 @@ export default function Products() {
   }, []);
 
   return (
-    <main className="flex flex-1 flex-col overflow-hidden pb-20">
+    <main className="p-6 w-full">
       <div className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 sm:px-8 sm:py-4">
         <Input
           placeholder="Search by name..."
