@@ -54,12 +54,28 @@ export async function POST(req: Request) {
         ...(firstName ? { first_name: firstName } : {}),
         ...(lastName ? { last_name: lastName } : {}),
       },
-      ignoreExisting: true,
+      ignoreExisting: false,
     });
     return NextResponse.json({ success: true, invitationId: invitation.id });
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Failed to send invitation.";
+    // Clerk returns an error when an invitation for this email already exists.
+    // Surface a clear message so the admin knows to ask the invitee to check
+    // spam, or to revoke the pending invitation in Clerk before re-sending.
+    const isAlreadyInvited =
+      message.toLowerCase().includes("already") ||
+      message.toLowerCase().includes("invitation") ||
+      message.toLowerCase().includes("identifier");
+    if (isAlreadyInvited) {
+      return NextResponse.json(
+        {
+          error:
+            "An invitation is already pending for this email. Ask them to check spam, or revoke the existing invitation in your Clerk dashboard before resending.",
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

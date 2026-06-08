@@ -29,12 +29,13 @@ export function StaffInviteModal({
   open: boolean;
   onClose: () => void;
 }) {
-  // Fetched only to map the chosen access level → the real Convex role name on
-  // submit (NOT for the dropdown display, which is hardcoded Admin / Cashier).
-  const roles = useQuery(
-    api.user.roles.listByApp,
-    open ? { app: "admin" } : "skip",
+  // Fetch all roles so we can resolve both Admin (app:"admin") and Cashier
+  // (app:"web") — listByApp with "admin" would miss cashier roles entirely.
+  const rolesResult = useQuery(
+    api.user.roles.list,
+    open ? { paginationOpts: { numItems: 100, cursor: null } } : "skip",
   );
+  const roles = useMemo(() => rolesResult?.page ?? [], [rolesResult]);
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -57,16 +58,16 @@ export function StaffInviteModal({
 
   /** Resolve the chosen access level to an actual role name that exists. */
   function resolveRoleName(): string | null {
-    const list = roles ?? [];
     if (choice === "admin") {
-      // Prefer a role with "*" (Super Admin), else any role named "…Admin…".
       const adminRole =
-        list.find((r) => r.permissions?.includes("*")) ??
-        list.find((r) => r.name.toLowerCase().includes("admin"));
+        roles.find((r) => r.permissions?.includes("*")) ??
+        roles.find((r) => r.name.toLowerCase().includes("admin"));
       return adminRole?.name ?? null;
     }
-    const cashierRole = list.find((r) => r.name.toLowerCase() === "cashier");
-    return cashierRole?.name ?? "Cashier";
+    const cashierRole =
+      roles.find((r) => r.name.toLowerCase() === "cashier") ??
+      roles.find((r) => r.name.toLowerCase().includes("cashier"));
+    return cashierRole?.name ?? null;
   }
 
   async function handleInvite(e: React.FormEvent) {
@@ -182,7 +183,7 @@ export function StaffInviteModal({
               <Button
                 type="submit"
                 className="h-11 flex-1"
-                disabled={submitting || !email.trim() || roles === undefined}
+                disabled={submitting || !email.trim() || rolesResult === undefined}
               >
                 {submitting ? "Sending…" : "Send Invite"}
               </Button>
