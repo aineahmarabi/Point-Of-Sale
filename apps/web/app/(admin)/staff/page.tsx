@@ -9,7 +9,7 @@ import { Button } from "@repo/ui/components/ui/button";
 
 import { DataTable } from "@/components/admin/module/data-table";
 import { getColumns } from "./columns";
-import { StaffInviteModal, StaffEditModal } from "./form";
+import { StaffInviteModal, StaffEditModal, StaffDeleteDialog } from "./form";
 
 type Staff = Doc<"users"> & { role_name?: string | null };
 
@@ -28,6 +28,7 @@ export default function StaffPage() {
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [selected, setSelected] = useState<Staff | undefined>();
 
   const staff = useMemo(
@@ -49,6 +50,10 @@ export default function StaffPage() {
         onEdit: (s) => {
           setSelected(s);
           setEditOpen(true);
+        },
+        onDelete: (s) => {
+          setSelected(s);
+          setDeleteOpen(true);
         },
       }),
     [currentUser],
@@ -84,6 +89,11 @@ export default function StaffPage() {
       <StaffEditModal
         open={editOpen}
         onClose={() => setEditOpen(false)}
+        staff={selected}
+      />
+      <StaffDeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
         staff={selected}
       />
     </main>

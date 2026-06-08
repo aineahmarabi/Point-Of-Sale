@@ -158,3 +158,48 @@ export const remove = mutation({
     return await ctx.db.delete(args.id);
   },
 });
+
+export const bulkCreate = mutation({
+  args: {
+    products: v.array(
+      v.object({
+        name: v.string(),
+        description: v.optional(v.string()),
+        sku: v.optional(v.string()),
+        barcode: v.optional(v.string()),
+        cost_price: v.number(),
+        selling_price: v.number(),
+        unit: v.optional(v.string()),
+        tax_rate: v.optional(v.number()),
+        status: v.optional(v.union(v.literal("active"), v.literal("draft"), v.literal("archived"))),
+        is_service: v.optional(v.boolean()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await assertPermission(ctx, "products:create");
+    const results: { name: string; status: "created" | "skipped"; reason?: string }[] = [];
+    for (const p of args.products) {
+      if (p.sku) {
+        const existing = await ctx.db
+          .query("products")
+          .withIndex("by_sku", (q) => q.eq("sku", p.sku))
+          .first();
+        if (existing) {
+          results.push({ name: p.name, status: "skipped", reason: `SKU "${p.sku}" already exists` });
+          continue;
+        }
+      }
+      const slug = slugify(p.name);
+      await ctx.db.insert("products", {
+        ...p,
+        slug,
+        status: p.status ?? "active",
+        is_service: p.is_service ?? false,
+        images: [],
+      });
+      results.push({ name: p.name, status: "created" });
+    }
+    return results;
+  },
+});

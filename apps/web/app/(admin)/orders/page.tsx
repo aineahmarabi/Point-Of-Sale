@@ -17,7 +17,7 @@ import {
 
 import { getColumns } from "./columns";
 import { DataTable } from "@/components/admin/module/data-table";
-import { OrderView } from "./form";
+import { OrderView, OrderDelete } from "./form";
 import { formatCurrency } from "@/lib/format";
 
 type OrderRow = Doc<"orders"> & { cashier_name?: string | null; customer_name?: string | null };
@@ -99,6 +99,7 @@ export default function Orders() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [showCount, setShowCount] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [selected, setSelected] = useState<Doc<"orders"> | undefined>();
   const cursorsRef = useRef<Map<string, string>>(new Map());
   const settings = useQuery(api.settings.storeSettings.current);
@@ -109,9 +110,14 @@ export default function Orders() {
     setSheetOpen(true);
   }, []);
 
+  const handleDelete = useCallback((row: Doc<"orders">) => {
+    setSelected(row);
+    setDeleteOpen(true);
+  }, []);
+
   const columns = useMemo(
-    () => getColumns({ onView: handleView }),
-    [handleView],
+    () => getColumns({ onView: handleView, onDelete: handleDelete }),
+    [handleView, handleDelete],
   );
 
   const status = columnFilters.find((f) => f.id === "status")?.value as
@@ -265,6 +271,11 @@ export default function Orders() {
       <OrderView
         open={sheetOpen}
         onOpenChange={setSheetOpen}
+        order={selected}
+      />
+      <OrderDelete
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
         order={selected}
       />
     </main>

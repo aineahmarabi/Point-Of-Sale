@@ -21,6 +21,7 @@ import { getColumns } from "./columns";
 import { DataTable } from "@/components/admin/module/data-table";
 import { PermissionGuard } from "@/components/admin/module/permission-guard";
 import { ProductDelete } from "./form";
+import { ProductImportModal } from "./import";
 import { VariantsManager } from "@/components/admin/variants-manager";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
@@ -35,6 +36,8 @@ export default function Products() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [toDelete, setToDelete] = useState<Doc<"products"> | undefined>();
+
+  const [importOpen, setImportOpen] = useState(false);
 
   const [variantsOpen, setVariantsOpen] = useState(false);
   const [variantsProduct, setVariantsProduct] =
@@ -183,7 +186,10 @@ export default function Products() {
           </SelectContent>
         </Select>
         <PermissionGuard permission="products:create">
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" onClick={() => setImportOpen(true)}>
+              Import
+            </Button>
             <Button onClick={handleNew}>New</Button>
           </div>
         </PermissionGuard>
@@ -208,6 +214,10 @@ export default function Products() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         product={toDelete}
+      />
+      <ProductImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
       />
       <VariantsManager
         open={variantsOpen}

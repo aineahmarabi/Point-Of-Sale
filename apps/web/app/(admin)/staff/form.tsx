@@ -18,6 +18,7 @@ import {
 } from "@repo/ui/components/ui/select";
 
 import { Modal } from "@/components/pos/modal";
+import { DeleteMessage } from "@/components/admin/module/delete-message";
 import { notifyError, notifySuccess } from "@/lib/errors";
 
 type Staff = Doc<"users"> & { role_name?: string | null };
@@ -367,5 +368,34 @@ export function StaffEditModal({
         </div>
       </div>
     </Modal>
+  );
+}
+
+export function StaffDeleteDialog({
+  open,
+  onOpenChange,
+  staff,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  staff?: Staff;
+}) {
+  const removeStaff = useMutation(api.user.users.remove);
+  const name = staff?.name
+    ? `${staff.name.first} ${staff.name.last}`
+    : staff?.email;
+
+  return (
+    <DeleteMessage
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Delete Staff Member"
+      description="Are you sure you want to permanently delete"
+      entityName={name}
+      onConfirm={async () => {
+        if (!staff) return;
+        await removeStaff({ id: staff._id });
+      }}
+    />
   );
 }

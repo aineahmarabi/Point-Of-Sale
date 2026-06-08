@@ -19,6 +19,7 @@ const statusStyles: Record<string, string> = {
 
 interface ActionCallbacks {
   onView: (row: Order) => void;
+  onDelete: (row: Order) => void;
 }
 
 export function getColumns(actions: ActionCallbacks): ColumnDef<Order>[] {
@@ -89,6 +90,7 @@ export function getColumns(actions: ActionCallbacks): ColumnDef<Order>[] {
           row={row.original}
           module="orders"
           onView={actions.onView}
+          onDelete={actions.onDelete}
         />
       ),
     },

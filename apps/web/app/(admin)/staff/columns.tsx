@@ -14,11 +14,13 @@ const statusStyles: Record<string, string> = {
 interface ActionCallbacks {
   currentUserId?: string;
   onEdit: (staff: Staff) => void;
+  onDelete: (staff: Staff) => void;
 }
 
 export function getColumns({
   currentUserId,
   onEdit,
+  onDelete,
 }: ActionCallbacks): ColumnDef<Staff>[] {
   return [
     {
@@ -74,13 +76,20 @@ export function getColumns({
           );
         }
         return (
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => onEdit(staff)}
               className="text-sm font-medium text-blue-600 hover:underline"
             >
               Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete(staff)}
+              className="text-sm font-medium text-red-600 hover:underline"
+            >
+              Delete
             </button>
           </div>
         );

@@ -229,6 +229,21 @@ async function roleIsAdmin(
   );
 }
 
+/** Permanently remove a staff member from the system. */
+export const remove = mutation({
+  args: { id: v.id("users") },
+  handler: async (ctx, args) => {
+    await assertPermission(ctx, "staff:remove");
+    const { user } = await getAuthUser(ctx);
+    if (user._id === args.id) {
+      throw new ConvexError("You cannot delete your own account.");
+    }
+    const target = await ctx.db.get(args.id);
+    if (!target) throw new ConvexError("Staff member not found.");
+    return await ctx.db.delete(args.id);
+  },
+});
+
 /**
  * Assign a role to a user and mark them active. Used by staff management and
  * the invite-acceptance flow so accounts never end up role-less.

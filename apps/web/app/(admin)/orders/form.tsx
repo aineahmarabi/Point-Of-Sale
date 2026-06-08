@@ -1,10 +1,11 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@repo/backend";
 import type { Doc } from "@repo/backend/dataModel";
 
 import { FormSheet } from "@/components/admin/module/form-sheet";
+import { DeleteMessage } from "@/components/admin/module/delete-message";
 
 type Order = Doc<"orders"> & {
   cashier_name?: string | null;
@@ -108,5 +109,31 @@ export function OrderView({ open, onOpenChange, order }: OrderViewProps) {
         </div>
       )}
     </FormSheet>
+  );
+}
+
+export function OrderDelete({
+  open,
+  onOpenChange,
+  order,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  order?: Order;
+}) {
+  const removeOrder = useMutation(api.pos.orders.remove);
+
+  return (
+    <DeleteMessage
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Delete Order"
+      description="Are you sure you want to permanently delete order"
+      entityName={order?.order_number}
+      onConfirm={async () => {
+        if (!order) return;
+        await removeOrder({ id: order._id });
+      }}
+    />
   );
 }
