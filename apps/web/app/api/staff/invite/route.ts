@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   try {
     const invitation = await clerk.invitations.createInvitation({
       emailAddress: email,
-      redirectUrl: "https://etherealdayo.com/sign-up",
+      redirectUrl: "https://etherealdayo.com/sign-in",
       publicMetadata: {
         role,
         firstName,

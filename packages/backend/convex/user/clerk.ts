@@ -119,16 +119,19 @@ export const clerkWebhook = httpAction(async (ctx, req) => {
 
   const { data } = request;
 
-  const meta = data.public_metadata ?? {};
-  const roleName: string = meta.role ?? "Customer";
-  const role = await ctx.runQuery(internal.user.clerk.getRoleByName, {
-    name: roleName,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const meta: any = data.public_metadata ?? {};
 
-  // For invited users (meta.invited === true), derive the app array from the role
-  // name so admins get ["web","admin"] even without an explicit meta.app field.
+  // Only look up a role when the invite explicitly set one
+  const roleName: string | undefined = meta.role || undefined;
+  const role = roleName
+    ? await ctx.runQuery(internal.user.clerk.getRoleByName, { name: roleName })
+    : null;
+
+  // For invited users, derive the app array from the role name so admins get
+  // ["web","admin"] even without an explicit meta.app field.
   const isInvited: boolean = meta.invited === true;
-  const isAdminRole: boolean = roleName.toLowerCase().includes("admin");
+  const isAdminRole: boolean = (roleName ?? "").toLowerCase().includes("admin");
   const appArray: string[] = isInvited
     ? (isAdminRole ? ["web", "admin"] : ["web"])
     : (Array.isArray(meta.app) ? meta.app : [meta.app ?? "web"]);
@@ -149,7 +152,7 @@ export const clerkWebhook = httpAction(async (ctx, req) => {
     email: data.email_addresses[0].email_address,
     phone: meta.phone ?? undefined,
     user_type: meta.user_type ?? undefined,
-    status: meta.status ?? "active",
+    status: "active" as const,
     app: appArray as ("admin" | "web")[],
     is_admin: isAdmin,
     role: role?._id,
