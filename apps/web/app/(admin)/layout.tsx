@@ -57,14 +57,14 @@ function AdminShell({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-screen overflow-hidden">
       <AdminSidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         user={user}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col min-h-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <PageHeader
           title={titleForPath(pathname)}
           leading={
@@ -79,10 +79,7 @@ function AdminShell({
           }
         />
 
-        <main
-          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-slate-100"
-          style={{ scrollbarGutter: "stable" }}
-        >
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-screen bg-gray-50">
           {children}
         </main>
       </div>

@@ -149,7 +149,7 @@ export default function StoreSettings() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 sm:px-8 pt-8 pb-20">
+    <div className="min-h-full p-6 pb-20">
         <div className="mb-6">
           <p className="text-muted-foreground text-sm">
             Configure your store details, receipts and selling rules.
