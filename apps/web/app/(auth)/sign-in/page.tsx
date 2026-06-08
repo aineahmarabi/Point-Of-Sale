@@ -40,18 +40,32 @@ export default function SignInPage() {
   } = useSignInFlow();
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-gray-50 px-6">
-      <div className="flex w-full max-w-sm flex-col items-center gap-6">
+    <div
+      className="relative flex h-full w-full items-center justify-center"
+      style={{
+        backgroundImage: "url('/bg-login.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* Content above overlay */}
+      <div className="relative z-10 mx-4 w-full max-w-md">
         {storePublic?.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={storePublic.logo_url}
             alt={storePublic.store_name ?? "Store logo"}
-            className="mx-auto h-24 w-24 rounded-full object-cover"
+            className="mx-auto mb-6 h-24 w-24 rounded-full object-cover"
+            style={{ filter: "drop-shadow(0 2px 12px rgba(255,255,255,0.6))" }}
           />
         ) : null}
+
         {step === "signIn" ? (
-          <Card className="w-full">
+          <Card className="w-full rounded-2xl bg-white shadow-2xl">
             <CardHeader className="text-center">
               <CardTitle className="font-serif text-2xl">
                 Welcome back
@@ -118,7 +132,7 @@ export default function SignInPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="w-full">
+          <Card className="w-full rounded-2xl bg-white shadow-2xl">
             <CardHeader className="text-center">
               <CardTitle className="font-serif text-2xl">
                 Verify your identity
