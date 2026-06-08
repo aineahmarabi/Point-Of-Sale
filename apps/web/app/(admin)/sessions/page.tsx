@@ -101,7 +101,7 @@ export default function Sessions() {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex shrink-0 items-center gap-4 px-8 py-4">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 sm:px-8 sm:py-4">
         <Select value={status ?? "all"} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="All statuses" />

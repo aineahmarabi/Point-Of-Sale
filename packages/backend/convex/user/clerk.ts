@@ -166,7 +166,7 @@ export const clerkWebhook = httpAction(async (ctx, req) => {
       break;
     }
     default: {
-      console.log(`Unhandled Clerk webhook event type: ${request.type}`);
+      // Unhandled event types are silently ignored.
     }
   }
   return new Response("Clerk webhook processed", { status: 200 });

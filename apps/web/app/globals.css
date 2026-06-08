@@ -29,11 +29,13 @@
 }
 
 @media print {
-  body > * { display: none !important; }
+  body * { visibility: hidden; }
+  #receipt-print-area,
+  #receipt-print-area * { visibility: visible; }
   #receipt-print-area {
-    display: block !important;
-    position: fixed;
-    top: 0; left: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     padding: 20px;
     background: white;

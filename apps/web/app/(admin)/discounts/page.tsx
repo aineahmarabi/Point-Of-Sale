@@ -154,12 +154,12 @@ export default function Discounts() {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex shrink-0 items-center gap-4 px-8 py-4">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 sm:px-8 sm:py-4">
         <Input
           placeholder="Search by name..."
           value={search ?? ""}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="max-w-sm"
+          className="w-full max-w-xs sm:max-w-sm"
         />
         <Select value={type ?? "all"} onValueChange={handleTypeChange}>
           <SelectTrigger className="w-40">

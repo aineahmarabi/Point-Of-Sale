@@ -95,6 +95,10 @@ function AdminGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (currentUser === undefined) return;
+    if (currentUser === null) {
+      router.replace("/sign-in");
+      return;
+    }
     if (!allowed) router.replace("/terminal");
   }, [currentUser, allowed, router]);
 

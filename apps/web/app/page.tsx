@@ -13,7 +13,11 @@ export default function RootPage() {
 
   useEffect(() => {
     if (currentUser === undefined) return;
-    if (currentUser && isAdminRole(currentUser.role)) {
+    if (currentUser === null) {
+      router.replace("/sign-in");
+      return;
+    }
+    if (isAdminRole(currentUser.role)) {
       router.replace("/dashboard");
     } else {
       router.replace("/terminal");

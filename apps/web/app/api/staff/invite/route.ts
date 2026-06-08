@@ -13,6 +13,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Verify caller is an admin via their Clerk public metadata.
+  const client = await clerkClient();
+  const caller = await client.users.getUser(userId);
+  const meta = (caller.publicMetadata ?? {}) as { role?: string; app?: string[] };
+  const roleStr = (meta.role ?? "").toLowerCase();
+  const callerIsAdmin =
+    roleStr.includes("admin") ||
+    (Array.isArray(meta.app) && meta.app.includes("admin"));
+  if (!callerIsAdmin) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   let body: {
     email?: string;
     role?: string;

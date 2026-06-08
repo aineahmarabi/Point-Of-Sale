@@ -101,7 +101,7 @@ export default function TaxRates() {
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex shrink-0 items-center gap-4 px-8 py-4">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 sm:px-8 sm:py-4">
         <PermissionGuard permission="tax_rates:create">
           <div className="ml-auto">
             <Button onClick={handleNew}>New</Button>
