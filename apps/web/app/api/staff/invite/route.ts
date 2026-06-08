@@ -61,8 +61,12 @@ export async function POST(req: Request) {
       ignoreExisting: false,
     });
     return NextResponse.json({ success: true, invitationId: invitation.id });
-  } catch (err) {
-    console.error("[staff/invite] Clerk error:", err);
+  } catch (err: unknown) {
+    console.error("[staff/invite] Clerk error:", JSON.stringify(err, null, 2));
+    const clerkErr = err as Record<string, unknown> | null;
+    if (clerkErr?.errors) {
+      console.error("[staff/invite] Clerk errors detail:", JSON.stringify(clerkErr.errors, null, 2));
+    }
     const message =
       err instanceof Error ? err.message : "Failed to send invitation.";
     // Clerk returns an error when an invitation for this email already exists.
@@ -79,6 +83,13 @@ export async function POST(req: Request) {
         { status: 409 },
       );
     }
-    return NextResponse.json({ error: message }, { status: 500 });
+    const errorsArr = clerkErr?.errors as Array<{ message?: string }> | undefined;
+    return Response.json(
+      {
+        error: "Failed to send invitation",
+        detail: errorsArr?.[0]?.message ?? message ?? "Unknown error",
+      },
+      { status: 500 },
+    );
   }
 }
