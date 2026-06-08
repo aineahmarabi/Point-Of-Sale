@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useSignUp } from "@clerk/nextjs";
 
-type Step = "signUp" | "verify";
+type Step = "signUp" | "verify" | "success";
 
 export function useSignUpFlow() {
   const { signUp, isLoaded, setActive } = useSignUp();
@@ -26,17 +26,25 @@ export function useSignUpFlow() {
       setError(null);
 
       try {
-        await signUp.create({
+        // Don't pass emailAddress when empty — invite tickets supply it automatically
+        const result = await signUp.create({
           firstName,
           lastName,
-          emailAddress: email,
+          ...(email.trim() ? { emailAddress: email.trim() } : {}),
           password,
         });
 
+        if (result.status === "complete") {
+          // Invite flow: Clerk accepted the ticket and signup is already done
+          setStep("success");
+          await setActive({ session: result.createdSessionId });
+          return;
+        }
+
+        // Regular signup: email still needs verification
         await signUp.prepareEmailAddressVerification({
           strategy: "email_code",
         });
-
         setStep("verify");
       } catch (err: unknown) {
         const message =
@@ -46,7 +54,7 @@ export function useSignUpFlow() {
         setLoading(false);
       }
     },
-    [isLoaded, signUp, firstName, lastName, email, password],
+    [isLoaded, signUp, firstName, lastName, email, password, setActive],
   );
 
   const handleVerify = useCallback(
@@ -63,6 +71,7 @@ export function useSignUpFlow() {
         });
 
         if (result.status === "complete") {
+          setStep("success");
           await setActive({ session: result.createdSessionId });
         } else {
           setError("Verification could not be completed. Please try again.");

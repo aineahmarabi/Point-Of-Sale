@@ -53,10 +53,9 @@ export async function POST(req: Request) {
       redirectUrl: "https://etherealdayo.com/sign-up",
       publicMetadata: {
         role,
-        app: isAdmin ? ["web", "admin"] : ["web"],
-        status: "active",
-        ...(firstName ? { first_name: firstName } : {}),
-        ...(lastName ? { last_name: lastName } : {}),
+        firstName,
+        lastName,
+        invited: true,
       },
       ignoreExisting: false,
     });

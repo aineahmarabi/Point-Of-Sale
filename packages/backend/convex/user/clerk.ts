@@ -125,15 +125,21 @@ export const clerkWebhook = httpAction(async (ctx, req) => {
     name: roleName,
   });
 
-  const appArray: string[] = Array.isArray(meta.app)
-    ? meta.app
-    : [meta.app ?? "web"];
+  // For invited users (meta.invited === true), derive the app array from the role
+  // name so admins get ["web","admin"] even without an explicit meta.app field.
+  const isInvited: boolean = meta.invited === true;
+  const isAdminRole: boolean = roleName.toLowerCase().includes("admin");
+  const appArray: string[] = isInvited
+    ? (isAdminRole ? ["web", "admin"] : ["web"])
+    : (Array.isArray(meta.app) ? meta.app : [meta.app ?? "web"]);
   const isAdmin = appArray.includes("admin");
 
-  // Name: prefer what the user entered at signup; fall back to what the admin
-  // supplied in the invite metadata (stored as meta.first_name / meta.last_name).
-  const firstName: string = data.first_name || meta.first_name || "";
-  const lastName: string = data.last_name || meta.last_name || "";
+  // Name: prefer what the user entered at signup; fall back to invite metadata.
+  // Support both camelCase (new) and snake_case (legacy) invite metadata keys.
+  const firstName: string =
+    data.first_name || meta.firstName || meta.first_name || "";
+  const lastName: string =
+    data.last_name || meta.lastName || meta.last_name || "";
 
   const userFields = {
     name:
