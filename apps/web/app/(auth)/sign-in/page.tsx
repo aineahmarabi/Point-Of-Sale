@@ -38,6 +38,10 @@ export default function SignInPage() {
             },
             elements: {
               card: "bg-gradient-to-br from-white via-rose-50 to-amber-50 shadow-2xl border border-white/20 rounded-2xl",
+              socialButtonsBlockButton: "hidden",
+              socialButtonsProviderIcon: "hidden",
+              dividerRow: "hidden",
+              dividerText: "hidden",
             },
           }}
         />

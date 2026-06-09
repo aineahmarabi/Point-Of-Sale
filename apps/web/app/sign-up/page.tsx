@@ -41,10 +41,14 @@ export default function SignUpPage() {
               headerSubtitle: "text-slate-500",
               formFieldInput:
                 "bg-white/80 border-slate-200 focus:border-[#7B1C1C]",
-              formButtonPrimary:
-                "bg-[#7B1C1C] hover:bg-[#6a1818] text-white",
-              footerActionText: "text-slate-500",
-              footerActionLink: "text-[#7B1C1C]",
+              formButtonPrimary: "bg-[#7B1C1C] hover:bg-[#6a1818] text-white",
+              socialButtonsBlockButton: "hidden",
+              socialButtonsProviderIcon: "hidden",
+              dividerRow: "hidden",
+              dividerText: "hidden",
+              footerAction: "hidden",
+              footerActionLink: "hidden",
+              footerActionText: "hidden",
             },
           }}
         />
