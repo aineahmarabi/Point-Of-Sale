@@ -33,6 +33,14 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "Analytics",
+    links: [
+      { label: "Sales", href: "/analytics/sales", icon: UngroupItemsIcon },
+      { label: "Orders", href: "/analytics/orders", icon: Package01Icon },
+      { label: "Inventory", href: "/analytics/inventory", icon: GroupItemsIcon },
+    ],
+  },
+  {
     title: "Catalog",
     links: [
       { label: "Products", href: "/products", icon: Package01Icon },

@@ -199,3 +199,198 @@ export const getLowStockItems = query({
     );
   },
 });
+
+// ── REPORT QUERIES ────────────────────────────────────────────
+
+async function allOrdersInRange(
+  ctx: QueryCtx,
+  start: number,
+  end: number,
+): Promise<Doc<"orders">[]> {
+  const all = await ctx.db.query("orders").collect();
+  return all.filter((o) => {
+    const t = typeof o.completed_at === "number" ? o.completed_at : o._creationTime;
+    return t >= start && t <= end;
+  });
+}
+
+export const getSalesReport = query({
+  args: { startDate: v.number(), endDate: v.number() },
+  handler: async (ctx, args) => {
+    const orders = await completedOrdersInRange(ctx, args.startDate, args.endDate);
+    const totalSales = orders.reduce((s, o) => s + o.grand_total, 0);
+    const totalOrders = orders.length;
+    const avgOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
+    const totalTax = orders.reduce((s, o) => s + o.tax_total, 0);
+
+    const span = args.endDate - args.startDate;
+    const groupBy: "hour" | "day" = span <= 2 * 24 * 60 * 60 * 1000 ? "hour" : "day";
+
+    const timeBuckets = new Map<number, number>();
+    for (const o of orders) {
+      const t = o.completed_at ?? o._creationTime;
+      const d = new Date(t);
+      if (groupBy === "hour") { d.setMinutes(0, 0, 0); } else { d.setHours(0, 0, 0, 0); }
+      const key = d.getTime();
+      timeBuckets.set(key, (timeBuckets.get(key) ?? 0) + o.grand_total);
+    }
+    const salesOverTime = Array.from(timeBuckets.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([period, total]) => ({ period, total }));
+
+    const byPaymentMethod = { cash: 0, paybill: 0, split: 0, other: 0 };
+    for (const o of orders) {
+      if (o.payment_method === "cash") byPaymentMethod.cash += o.grand_total;
+      else if (o.payment_method === "paybill") byPaymentMethod.paybill += o.grand_total;
+      else if (o.payment_method === "split") byPaymentMethod.split += o.grand_total;
+      else byPaymentMethod.other += o.grand_total;
+    }
+
+    const sorted = [...orders].sort(
+      (a, b) => (b.completed_at ?? b._creationTime) - (a.completed_at ?? a._creationTime),
+    );
+    const orderRows = await Promise.all(
+      sorted.map(async (o) => {
+        const cashier = await ctx.db.get(o.cashier_id);
+        const cashier_name = cashier?.name
+          ? `${cashier.name.first} ${cashier.name.last}`
+          : (cashier?.email ?? "—");
+        const items = await ctx.db
+          .query("order_items")
+          .withIndex("by_order", (q) => q.eq("order_id", o._id))
+          .collect();
+        const item_count = items.reduce((s, i) => s + i.quantity, 0);
+        return {
+          _id: o._id,
+          order_number: o.order_number,
+          cashier_name,
+          item_count,
+          grand_total: o.grand_total,
+          payment_method: o.payment_method,
+          completed_at: o.completed_at ?? o._creationTime,
+        };
+      }),
+    );
+
+    return { totalSales, totalOrders, avgOrderValue, totalTax, salesOverTime, byPaymentMethod, groupBy, orders: orderRows };
+  },
+});
+
+export const getOrdersReport = query({
+  args: { startDate: v.number(), endDate: v.number() },
+  handler: async (ctx, args) => {
+    const orders = await allOrdersInRange(ctx, args.startDate, args.endDate);
+    const totalOrders = orders.length;
+
+    const byStatus = { completed: 0, voided: 0, refunded: 0 };
+    const byHourMap = new Map<number, number>();
+
+    for (const o of orders) {
+      if (o.status === "completed") byStatus.completed++;
+      else if (o.status === "voided") byStatus.voided++;
+      else if (o.status === "refunded") byStatus.refunded++;
+
+      const t = o.completed_at ?? o._creationTime;
+      const hour = new Date(t).getHours();
+      byHourMap.set(hour, (byHourMap.get(hour) ?? 0) + 1);
+    }
+
+    const cashierIds = [...new Set(orders.map((o) => o.cashier_id))];
+    const cashierNameMap = new Map<string, string>();
+    for (const id of cashierIds) {
+      const c = await ctx.db.get(id);
+      cashierNameMap.set(
+        id,
+        c?.name ? `${c.name.first} ${c.name.last}` : (c?.email ?? "—"),
+      );
+    }
+
+    const cashierCountMap = new Map<string, { name: string; count: number }>();
+    for (const o of orders) {
+      const name = cashierNameMap.get(o.cashier_id) ?? "—";
+      const ex = cashierCountMap.get(o.cashier_id);
+      if (ex) { ex.count++; } else { cashierCountMap.set(o.cashier_id, { name, count: 1 }); }
+    }
+
+    const byHour = Array.from({ length: 24 }, (_, h) => ({
+      hour: h,
+      label: `${String(h).padStart(2, "0")}:00`,
+      count: byHourMap.get(h) ?? 0,
+    }));
+
+    const byCashier = Array.from(cashierCountMap.values()).sort((a, b) => b.count - a.count);
+
+    const orderRows = [...orders]
+      .sort((a, b) => (b.completed_at ?? b._creationTime) - (a.completed_at ?? a._creationTime))
+      .map((o) => ({
+        _id: o._id,
+        order_number: o.order_number,
+        cashier_name: cashierNameMap.get(o.cashier_id) ?? "—",
+        grand_total: o.grand_total,
+        status: o.status,
+        payment_method: o.payment_method,
+        completed_at: o.completed_at ?? o._creationTime,
+      }));
+
+    return { totalOrders, byStatus, byHour, byCashier, orders: orderRows };
+  },
+});
+
+export const getInventoryReport = query({
+  args: {},
+  handler: async (ctx) => {
+    const inventory = await ctx.db.query("inventory").collect();
+    let inStock = 0;
+    let lowStock = 0;
+    let outOfStock = 0;
+
+    const items = await Promise.all(
+      inventory.map(async (i) => {
+        const product = await ctx.db.get(i.product_id);
+        const variant = i.variant_id ? await ctx.db.get(i.variant_id) : null;
+        const category = product?.category_id ? await ctx.db.get(product.category_id) : null;
+
+        let status: "ok" | "low" | "out";
+        if (i.quantity === 0) {
+          status = "out";
+          outOfStock++;
+        } else if (i.quantity <= i.reorder_point) {
+          status = "low";
+          lowStock++;
+        } else {
+          status = "ok";
+          inStock++;
+        }
+
+        return {
+          _id: i._id,
+          product_id: i.product_id,
+          product_name: product?.name ?? "Unknown",
+          variant_name: variant?.name ?? null,
+          category_name: category?.name ?? "Uncategorized",
+          quantity: i.quantity,
+          reorder_point: i.reorder_point,
+          status,
+        };
+      }),
+    );
+
+    const categoryMap = new Map<string, number>();
+    for (const item of items) {
+      const cat = item.category_name;
+      categoryMap.set(cat, (categoryMap.get(cat) ?? 0) + item.quantity);
+    }
+    const byCategory = Array.from(categoryMap.entries())
+      .map(([category, totalQuantity]) => ({ category, totalQuantity }))
+      .sort((a, b) => b.totalQuantity - a.totalQuantity);
+
+    return {
+      totalProducts: inventory.length,
+      inStock,
+      lowStock,
+      outOfStock,
+      items: [...items].sort((a, b) => a.quantity - b.quantity),
+      byCategory,
+    };
+  },
+});

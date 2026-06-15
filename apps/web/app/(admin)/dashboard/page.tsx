@@ -43,7 +43,6 @@ export default function DashboardPage() {
   });
   const lowStock = useQuery(api.analytics.getLowStockItems, {});
   const recentOrders = useQuery(api.analytics.getRecentOrders, { limit: 8 });
-  const openSessions = useQuery(api.pos.sessions.count, { status: "open" });
 
   const chartData = useMemo(
     () =>
@@ -70,15 +69,17 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI cards */}
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Total Sales Today"
           value={stats ? formatCurrency(stats.totalSales, currency) : "—"}
           accent="text-burgundy-600"
+          href="/analytics/sales"
         />
         <StatCard
           label="Total Orders Today"
           value={stats ? String(stats.totalOrders) : "—"}
+          href="/analytics/orders"
         />
         <StatCard
           label="Low Stock Items"
@@ -86,10 +87,7 @@ export default function DashboardPage() {
           accent={
             lowStock && lowStock.length > 0 ? "text-red-600" : "text-slate-900"
           }
-        />
-        <StatCard
-          label="Active Sessions"
-          value={openSessions != null ? String(openSessions) : "—"}
+          href="/analytics/inventory"
         />
       </div>
 
@@ -225,13 +223,15 @@ function StatCard({
   label,
   value,
   accent,
+  href,
 }: {
   label: string;
   value: string;
   accent?: string;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+  const body = (
+    <>
       <p className="text-sm text-slate-500">{label}</p>
       <p
         className={cn(
@@ -241,6 +241,41 @@ function StatCard({
       >
         {value}
       </p>
+      {href && (
+        <span className="mt-3 flex items-center gap-1 text-xs text-slate-400 group-hover:text-burgundy-600 transition-colors">
+          View report
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </span>
+      )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="group block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-burgundy-600 hover:shadow-lg cursor-pointer"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      {body}
     </div>
   );
 }
